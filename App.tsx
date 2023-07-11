@@ -16,12 +16,12 @@ import { Rooms } from './pages/Rooms';
 import { Map } from './pages/Map';
 import { NavBar } from './components/NavBar';
 import { BACKEND_API } from './utils/backend';
-import { Client } from './utils/client.utils';
+import { ClientStorage } from './utils/client.utils';
 import { InitUser } from './pages/InitUser';
 
 export default function App() {
   const Tab = createBottomTabNavigator();
-  const client = new Client();
+  const clientStorage = new ClientStorage();
   const socket = io(`ws://${BACKEND_API}`, {
     autoConnect: false,
   });
@@ -41,8 +41,9 @@ export default function App() {
       setIsPermissionsGranted(res);
     });
 
-    client.getClientName().then(name => {
+    clientStorage.getClientName().then(name => {
       setIsShowLoading(false);
+      // @ts-expect-error TS(2345): Argument of type 'string | null' is not assignable... Remove this comment to see the full error message
       setClientName(name);
       socket.emit('updateName', { name });
     });
@@ -60,31 +61,31 @@ export default function App() {
   return (
     <View style={styles.container}>
       {isShowLoading ?
-       <StatusBar style="auto"/> :
-       clientName ?
-       <NavigationContainer>
-         <Tab.Navigator tabBar={props => <NavBar navigation={props.navigation}/>}>
-           <Tab.Screen name="Map">
-             {props =>
-               <Map
-                 navigation={props.navigation}
-                 socket={socket}
-               />}
-           </Tab.Screen>
-           <Tab.Screen name="Rooms">
-             {props =>
-               <Rooms
-                 navigation={props.navigation}
-                 socket={socket}
-                 socketId={socketId}
-               />}
-           </Tab.Screen>
-         </Tab.Navigator>
-       </NavigationContainer> :
-       <InitUser
-         client={client}
-         socket={socket}
-       />
+        <StatusBar style="auto"/> :
+        clientName ?
+          <NavigationContainer>
+            <Tab.Navigator tabBar={props => <NavBar navigation={props.navigation}/>}>
+              <Tab.Screen name="Map">
+                {props =>
+                  <Map
+                    navigation={props.navigation}
+                    socket={socket}
+                  />}
+              </Tab.Screen>
+              <Tab.Screen name="Rooms">
+                {props =>
+                  <Rooms
+                    navigation={props.navigation}
+                    socket={socket}
+                    socketId={socketId}
+                  />}
+              </Tab.Screen>
+            </Tab.Navigator>
+          </NavigationContainer> :
+          <InitUser
+            clientStorage={clientStorage}
+            socket={socket}
+          />
       }
     </View>
   );

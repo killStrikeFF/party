@@ -1,15 +1,15 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export class Client {
+export class ClientStorage {
 
   clientLocalStorageKey = 'clientName';
   clientName = AsyncStorage.getItem(this.clientLocalStorageKey);
 
-  setClientName(name) {
-    return AsyncStorage.setItem(this.clientLocalStorageKey, name).then(r => this.clientName = name);
+  setClientName(name: string): Promise<void> {
+    return AsyncStorage.setItem(this.clientLocalStorageKey, name);
   }
 
-  getClientName() {
+  getClientName(): Promise<string | null> {
     return this.clientName;
   }
 

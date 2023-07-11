@@ -18,23 +18,28 @@ import { Button } from '@rneui/themed';
 import { getUserRegion } from '../utils/userLocation';
 import MapView, { Marker } from 'react-native-maps';
 import { RoomListItem } from './RoomListItem';
+import {
+  CreateRoom,
+  RoomInfo,
+} from '../types/room';
+import { Coordinates } from '../types/coordinates';
+import { UserRegion } from '../types/user-region';
 
 export function Rooms({
                         socket,
                         socketId,
-                      }) {
-  const [allRooms, setAllRooms] = useState([]);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [modalRoomName, setModalRoomName] = useState('');
-  const [selectedCoord, setCoord] = useState();
+                      }: any) {
+  const [allRooms, setAllRooms] = useState<RoomInfo[]>([]);
+  const [modalVisible, setModalVisible] = useState<boolean>(false);
+  const [modalRoomName, setModalRoomName] = useState<string>('');
+  const [selectedCoord, setCoord] = useState<Coordinates | null>();
 
-  const pressMap = (event) => setCoord(event.nativeEvent.coordinate);
+  const pressMap = (event: any) => setCoord(event.nativeEvent.coordinate);
 
-  const [initialRegion, setInitialRegion] = useState();
+  const [initialRegion, setInitialRegion] = useState<UserRegion>();
 
   const updateRooms = () => {
     axios.get(`http://${BACKEND_API}/party/all`).then(res => {
-      console.log(res.data);
       setAllRooms(res.data.parties);
     });
   };
@@ -52,19 +57,19 @@ export function Rooms({
     };
   }, []);
 
-  const createRoom = (name) => {
-    const data = {
+  const createRoom = () => {
+    const data: CreateRoom = {
       name: modalRoomName,
-      socket: socketId,
-      coords: { ...selectedCoord },
+      socketId: socketId,
+      coords: { ...selectedCoord } as Coordinates,
     };
 
     axios.post(
       `http://${BACKEND_API}/party`, data)
-         .then(res => {
-           updateRooms();
-           setModalVisible(false);
-         });
+      .then(res => {
+        updateRooms();
+        setModalVisible(false);
+      });
   };
   //
   // const joinRoom = () => {
@@ -110,16 +115,16 @@ export function Rooms({
 
               <View style={styles.modalMapContainer}>
                 {initialRegion ?
-                 <MapView
-                   style={styles.modalMap}
-                   initialRegion={initialRegion}
-                   onPress={pressMap}
-                 >
-                   {selectedCoord ?
-                    <Marker coordinate={selectedCoord}></Marker> :
-                    null}
-                 </MapView> :
-                 <ActivityIndicator size={'large'}/>
+                  <MapView
+                    style={styles.modalMap}
+                    initialRegion={initialRegion}
+                    onPress={pressMap}
+                  >
+                    {selectedCoord ?
+                      <Marker coordinate={selectedCoord}></Marker> :
+                      null}
+                  </MapView> :
+                  <ActivityIndicator size={'large'}/>
                 }
               </View>
 

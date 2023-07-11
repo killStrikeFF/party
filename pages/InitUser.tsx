@@ -1,18 +1,28 @@
-import { useState } from 'react';
 import {
+  useEffect,
+  useState,
+} from 'react';
+import {
+  StyleSheet,
   TextInput,
   View,
 } from 'react-native';
 import { Button } from '@rneui/themed';
+import { ClientStorage } from '../utils/client.utils';
+import { Socket } from 'socket.io-client';
 
 export function InitUser({
                            socket,
-                           client,
-                         }) {
-  const [clientName, changeClientName] = useState('Loh');
+                           clientStorage,
+                         }: { socket: Socket, clientStorage: ClientStorage }) {
+  const [clientName, changeClientName] = useState('');
+
+  useEffect(() => {
+    clientStorage.setClientName('');
+  });
 
   const saveClientName = () => {
-    client.setClientName(clientName).then(() => socket.emit('updateName', { name: clientName }));
+    clientStorage.setClientName(clientName).then(() => socket.emit('updateName', { name: clientName }));
   };
 
   return (
@@ -21,6 +31,7 @@ export function InitUser({
         onChangeText={changeClientName}
         value={clientName}
         style={styles.input}
+        placeholder={'Write your name, cocksucker'}
       />
 
       <Button
@@ -32,7 +43,7 @@ export function InitUser({
   );
 }
 
-const styles = {
+const styles = StyleSheet.create({
   container: {
     flex: 1,
     display: 'flex',
@@ -47,4 +58,4 @@ const styles = {
     borderWidth: 1,
     padding: 10,
   },
-};
+});
