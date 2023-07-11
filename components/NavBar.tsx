@@ -2,7 +2,9 @@ import {StyleSheet, View} from "react-native";
 import {Button} from "@rneui/themed";
 import React from "react";
 
-export function NavBar({navigation}) {
+export function NavBar({
+    navigation
+}: any) {
     return (
         <View style={styles.navBar}>
             <Button

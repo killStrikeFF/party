@@ -9,19 +9,23 @@ import React, {
   useState,
 } from 'react';
 import {
-  getUserPosition,
+  getUserCoordinates,
   getUserRegion,
 } from '../utils/userLocation';
+import { ClientCoordinates } from '../types/client-coordinates';
+import { UserRegion } from '../types/user-region';
 
-export function Map({ socket }) {
-  const [clients, setClients] = useState([]);
-  const [initialRegion, setInitialRegion] = useState();
-  const [updateTimeout, setUpdateTimeout] = useState();
+export function Map({
+                      socket,
+                    }: any) {
+  const [clients, setClients] = useState<ClientCoordinates[]>([]);
+  const [initialRegion, setInitialRegion] = useState<UserRegion | null>();
+  const [updateTimeout, setUpdateTimeout] = useState<NodeJS.Timeout>();
 
   const updateUserLocation = () => {
-    getUserPosition().then(pos => socket.emit('updateClientCoordinates', pos));
+    getUserCoordinates().then(pos => socket.emit('updateClientCoordinates', pos));
 
-    if (!initialRegion) {
+    if(!initialRegion) {
       getUserRegion().then(region => setInitialRegion(region));
     }
 
@@ -29,7 +33,7 @@ export function Map({ socket }) {
   };
 
   useEffect(() => {
-    socket.on('clientsCoordinates', (array) => setClients(array));
+    socket.on('clientsCoordinates', (array: any) => setClients(array));
     updateUserLocation();
     return () => {
       clearTimeout(updateTimeout);
@@ -38,22 +42,22 @@ export function Map({ socket }) {
   return (
     <View style={styles.container}>
       {initialRegion ?
-       <MapView
-         style={styles.map}
-         initialRegion={initialRegion}
-       >
-         {clients.map(client => (
-           <Marker
-             key={client.id}
-             title={client.name}
-             coordinate={{
-               latitude: client.coordinates.latitude,
-               longitude: client.coordinates.longitude,
-             }}
-           />
-         ))}
-       </MapView> :
-       <ActivityIndicator size={'large'}/>}
+        <MapView
+          style={styles.map}
+          initialRegion={initialRegion}
+        >
+          {clients.map(client => (
+            <Marker
+              key={client.socketId}
+              title={client.name}
+              coordinate={{
+                latitude: client.coords.latitude,
+                longitude: client.coords.longitude,
+              }}
+            />
+          ))}
+        </MapView> :
+        <ActivityIndicator size={'large'}/>}
     </View>
   );
 }

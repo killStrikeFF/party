@@ -3,8 +3,11 @@ import {
   Text,
   View,
 } from 'react-native';
+import { RoomInfo } from '../types/room';
 
-export function RoomListItem({ room }) {
+export function RoomListItem({
+                               room,
+                             }: { room: RoomInfo }) {
   return (
     <View style={styles.container}>
       <Text>{room.name}</Text>
