@@ -1,53 +1,97 @@
-import React, {useEffect, useState} from 'react'
-import {StyleSheet, View} from 'react-native'
-import {StatusBar} from 'expo-status-bar'
-import {io} from "socket.io-client";
-import * as Location from "expo-location";
-import {NavigationContainer} from '@react-navigation/native';
+import React, {
+  useEffect,
+  useState,
+} from 'react';
+import {
+  StyleSheet,
+  View,
+} from 'react-native';
+import { StatusBar } from 'expo-status-bar';
+import { io } from 'socket.io-client';
+import * as Location from 'expo-location';
+import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import './UserAgent'
-import {Map} from "./pages/Map";
-import {Rooms} from "./pages/Rooms";
-import {NavBar} from "./components/NavBar";
+import './UserAgent';
+import { Rooms } from './pages/Rooms';
+import { Map } from './pages/Map';
+import { NavBar } from './components/NavBar';
+import { BACKEND_API } from './utils/backend';
+import { Client } from './utils/client.utils';
+import { InitUser } from './pages/InitUser';
 
 export default function App() {
-    const Tab = createBottomTabNavigator();
-    const socket = io("ws://192.168.1.101:3000", {
-        autoConnect: false,
-    })
-    const [isPermissionsGranted, setIsPermissionsGranted] = useState(false);
+  const Tab = createBottomTabNavigator();
+  const client = new Client();
+  const socket = io(`ws://${BACKEND_API}`, {
+    autoConnect: false,
+  });
 
-    useEffect(() => {
-        getPermissions().then(res => {
-            setIsPermissionsGranted(res);
-        })
-    }, [])
+  const [socketId, setSocketId] = useState('');
+  const [clientName, setClientName] = useState('');
+  const [isPermissionsGranted, setIsPermissionsGranted] = useState(false);
+  const [isShowLoading, setIsShowLoading] = useState(true);
 
-    const getPermissions = async () => {
-        let {status} = await Location.requestForegroundPermissionsAsync()
-        return status === 'granted';
-    }
+  useEffect(() => {
+    socket.on('connect', () => {
+      setSocketId(socket.id);
+    });
 
+    socket.connect();
+    getPermissions().then(res => {
+      setIsPermissionsGranted(res);
+    });
 
-    return (
-        <View style={styles.container}>
-            <NavigationContainer>
-                <Tab.Navigator tabBar={props => <NavBar navigation={props.navigation}/>}>
-                    <Tab.Screen name="Map">
-                        { props => <Map navigation={props.navigation} socket={socket}/>}
-                    </Tab.Screen>
-                    <Tab.Screen name="Rooms">
-                        { props => <Rooms navigation={props.navigation} socket={socket}/>}
-                    </Tab.Screen>
-                </Tab.Navigator>
-            </NavigationContainer>
-            <StatusBar style="auto"/>
-        </View>
-    )
+    client.getClientName().then(name => {
+      setIsShowLoading(false);
+      setClientName(name);
+      socket.emit('updateName', { name });
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
+
+  const getPermissions = async () => {
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    return status === 'granted';
+  };
+
+  return (
+    <View style={styles.container}>
+      {isShowLoading ?
+       <StatusBar style="auto"/> :
+       clientName ?
+       <NavigationContainer>
+         <Tab.Navigator tabBar={props => <NavBar navigation={props.navigation}/>}>
+           <Tab.Screen name="Map">
+             {props =>
+               <Map
+                 navigation={props.navigation}
+                 socket={socket}
+               />}
+           </Tab.Screen>
+           <Tab.Screen name="Rooms">
+             {props =>
+               <Rooms
+                 navigation={props.navigation}
+                 socket={socket}
+                 socketId={socketId}
+               />}
+           </Tab.Screen>
+         </Tab.Navigator>
+       </NavigationContainer> :
+       <InitUser
+         client={client}
+         socket={socket}
+       />
+      }
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
+  container: {
+    flex: 1,
+  },
 });
