@@ -4,17 +4,18 @@ import React, {
 } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
-  Modal,
   StyleSheet,
-  Text,
-  TextInput,
   View,
 } from 'react-native';
 import axios from 'axios';
 import { BACKEND_API } from '../utils/backend';
-import { Button } from '@rneui/themed';
+import {
+  Button,
+  Dialog,
+  Input,
+  Text,
+} from '@rneui/themed';
 import { getUserRegion } from '../utils/userLocation';
 import MapView, { Marker } from 'react-native-maps';
 import { RoomListItem } from './RoomListItem';
@@ -35,27 +36,24 @@ export function Rooms({
   const [selectedCoord, setCoord] = useState<Coordinates | null>();
 
   const pressMap = (event: any) => setCoord(event.nativeEvent.coordinate);
+  const toggleModalVisible = () => {
+    setModalVisible(!modalVisible);
+    setModalRoomName('');
+    setCoord(null);
+  };
 
   const [initialRegion, setInitialRegion] = useState<UserRegion>();
+
+  useEffect(() => {
+    updateRooms();
+    getUserRegion().then(region => setInitialRegion(region));
+  }, []);
 
   const updateRooms = () => {
     axios.get(`http://${BACKEND_API}/party/all`).then(res => {
       setAllRooms(res.data.parties);
     });
   };
-
-  useEffect(() => {
-    updateRooms();
-    getUserRegion().then(region => {
-      console.log(region);
-      setInitialRegion(region);
-    });
-
-    return () => {
-      setCoord(null);
-      setModalRoomName('');
-    };
-  }, []);
 
   const createRoom = () => {
     const data: CreateRoom = {
@@ -68,7 +66,7 @@ export function Rooms({
       `http://${BACKEND_API}/party`, data)
       .then(res => {
         updateRooms();
-        setModalVisible(false);
+        toggleModalVisible();
       });
   };
   //
@@ -95,64 +93,53 @@ export function Rooms({
 
       </View>
 
-      {modalVisible &&
-        <Modal
-          animationType="slide"
-          transparent={false}
-          onRequestClose={() => {
-            Alert.alert('Modal has been closed.');
-            setModalVisible(!modalVisible);
-          }}
+      {modalVisible ?
+        <Dialog
+          isVisible={modalVisible}
+          onBackdropPress={toggleModalVisible}
+          overlayStyle={styles.dialogContainer}
         >
-          <View style={styles.modalContainer}>
-            <View style={styles.modalView}>
-              <TextInput
-                onChangeText={setModalRoomName}
-                value={modalRoomName}
-                style={styles.input}
-                placeholder={'Write a name of the room'}
-              />
+          <Dialog.Title title={'Create room'}/>
+          <Input
+            onChangeText={setModalRoomName}
+            value={modalRoomName}
+            placeholder={'Write a name of the room'}
+          />
 
-              <View style={styles.modalMapContainer}>
-                {initialRegion ?
-                  <MapView
-                    style={styles.modalMap}
-                    initialRegion={initialRegion}
-                    onPress={pressMap}
-                  >
-                    {selectedCoord ?
-                      <Marker coordinate={selectedCoord}></Marker> :
-                      null}
-                  </MapView> :
-                  <ActivityIndicator size={'large'}/>
-                }
-              </View>
-
-              <View style={styles.modalActions}>
-                <Button
-                  style={[styles.button, styles.buttonClose]}
-                  onPress={() => setModalVisible(!modalVisible)}
-                >
-                  <Text style={styles.textStyle}>Close</Text>
-                </Button>
-
-                <Button
-                  style={[styles.button, styles.buttonClose]}
-                  disabled={!modalRoomName || !selectedCoord}
-                  onPress={createRoom}
-                >
-                  <Text style={styles.textStyle}>Create room</Text>
-                </Button>
-              </View>
-            </View>
+          <View style={styles.modalMapContainer}>
+            {initialRegion ?
+              <MapView
+                style={styles.modalMap}
+                initialRegion={initialRegion}
+                onPress={pressMap}
+              >
+                {selectedCoord ?
+                  <Marker coordinate={selectedCoord}></Marker> :
+                  null}
+              </MapView> :
+              <ActivityIndicator size={'large'}/>
+            }
           </View>
-        </Modal>}
+
+          <Dialog.Actions>
+            <View style={styles.actionsContainer}>
+              <Dialog.Button onPress={() => toggleModalVisible()}>
+                <Text>Close</Text>
+              </Dialog.Button>
+
+              <Button
+                title={'Create room'}
+                disabled={!modalRoomName || !selectedCoord}
+                onPress={createRoom}
+              ></Button>
+            </View>
+          </Dialog.Actions>
+        </Dialog> : null}
 
       <View style={styles.addButton}>
         <Button
-          style={styles.addButton}
           title={'Add room'}
-          onPress={() => setModalVisible(true)}
+          onPress={() => toggleModalVisible()}
         />
       </View>
     </View>
@@ -164,17 +151,21 @@ const styles = StyleSheet.create({
     height: '100%',
     flex: 1,
   },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
+
+  actionsContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
   },
 
-  modalActions: {
+  dialogContainer: {
     width: '100%',
-    flexDirection: 'row',
+    height: '90%',
     justifyContent: 'space-between',
-    marginTop: 10,
+  },
+
+  modalMapContainer: {
+    height: '70%',
+    width: '100%',
   },
 
   modalMap: {
@@ -183,67 +174,15 @@ const styles = StyleSheet.create({
     width: 'auto',
   },
 
-  modalMapContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    height: '100%',
-    width: '100%',
-  },
-
-  modalView: {
-    flexDirection: 'column',
-    justifyContent: 'space-between',
-
-    height: '100%',
-    width: '100%',
-
-    backgroundColor: 'white',
-    borderRadius: 20,
-    padding: 35,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-
   roomsList: {
     padding: 20,
     flex: 1,
   },
+
   addButton: {
     position: 'absolute',
     top: '90%',
     left: '30%',
     right: '30%',
-  },
-
-  button: {
-    borderRadius: 5,
-    padding: 10,
-    elevation: 2,
-  },
-  buttonOpen: {
-    backgroundColor: '#F194FF',
-  },
-  buttonClose: {
-    backgroundColor: '#2196F3',
-  },
-  textStyle: {
-    color: 'white',
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  input: {
-    width: '100%',
-    height: 40,
-    margin: 12,
-    borderWidth: 1,
-    padding: 10,
-    borderRadius: 5,
   },
 });

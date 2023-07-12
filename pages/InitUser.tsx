@@ -1,41 +1,43 @@
-import {
-  useEffect,
-  useState,
-} from 'react';
+import { useState } from 'react';
 import {
   StyleSheet,
-  TextInput,
   View,
 } from 'react-native';
-import { Button } from '@rneui/themed';
+import {
+  Button,
+  Input,
+} from '@rneui/themed';
 import { ClientStorage } from '../utils/client.utils';
 import { Socket } from 'socket.io-client';
 
 export function InitUser({
                            socket,
                            clientStorage,
-                         }: { socket: Socket, clientStorage: ClientStorage }) {
+                           setClientName,
+                         }: {
+  socket: Socket,
+  clientStorage: ClientStorage,
+  setClientName: React.Dispatch<React.SetStateAction<string | null>>
+}) {
   const [clientName, changeClientName] = useState('');
 
-  useEffect(() => {
-    clientStorage.setClientName('');
-  });
-
   const saveClientName = () => {
-    clientStorage.setClientName(clientName).then(() => socket.emit('updateName', { name: clientName }));
+    clientStorage.setClientName(clientName).then(() => {
+      socket.emit('updateName', { name: clientName });
+      setClientName(clientName);
+    });
   };
 
   return (
     <View style={styles.container}>
-      <TextInput
+      <Input
         onChangeText={changeClientName}
         value={clientName}
-        style={styles.input}
         placeholder={'Write your name, cocksucker'}
       />
 
       <Button
-        title="Save your name"
+        title="Save"
         onPress={() => saveClientName()}
         disabled={!clientName}
       />
@@ -50,12 +52,5 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     columnGap: 20,
     padding: 50,
-  },
-
-  input: {
-    height: 40,
-    margin: 12,
-    borderWidth: 1,
-    padding: 10,
   },
 });

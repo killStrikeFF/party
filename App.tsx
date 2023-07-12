@@ -26,10 +26,10 @@ export default function App() {
     autoConnect: false,
   });
 
-  const [socketId, setSocketId] = useState('');
-  const [clientName, setClientName] = useState('');
-  const [isPermissionsGranted, setIsPermissionsGranted] = useState(false);
-  const [isShowLoading, setIsShowLoading] = useState(true);
+  const [socketId, setSocketId] = useState<string>('');
+  const [clientName, setClientName] = useState<string | null>('');
+  const [isPermissionsGranted, setIsPermissionsGranted] = useState<boolean>(false);
+  const [isShowLoading, setIsShowLoading] = useState<boolean>(true);
 
   useEffect(() => {
     socket.on('connect', () => {
@@ -43,7 +43,6 @@ export default function App() {
 
     clientStorage.getClientName().then(name => {
       setIsShowLoading(false);
-      // @ts-expect-error TS(2345): Argument of type 'string | null' is not assignable... Remove this comment to see the full error message
       setClientName(name);
       socket.emit('updateName', { name });
     });
@@ -85,6 +84,7 @@ export default function App() {
           <InitUser
             clientStorage={clientStorage}
             socket={socket}
+            setClientName={setClientName}
           />
       }
     </View>
