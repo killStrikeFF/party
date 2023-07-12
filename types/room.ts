@@ -8,7 +8,7 @@ export interface Room {
 
 export interface RoomInfo extends Room {
   uuid: string;
-  clientCount: number;
+  clientsCount: number;
   owner?: Client;
 }
 
