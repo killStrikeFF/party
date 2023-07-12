@@ -5,6 +5,7 @@ import React, {
 import {
   ActivityIndicator,
   FlatList,
+  Keyboard,
   StyleSheet,
   View,
 } from 'react-native';
@@ -34,6 +35,7 @@ export function Rooms({
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [modalRoomName, setModalRoomName] = useState<string>('');
   const [selectedCoord, setCoord] = useState<Coordinates | null>();
+  const [isKeyboardVisible, setKeyboardVisible] = useState(false);
 
   const pressMap = (event: any) => setCoord(event.nativeEvent.coordinate);
   const toggleModalVisible = () => {
@@ -47,23 +49,41 @@ export function Rooms({
   useEffect(() => {
     updateRooms();
     getUserRegion().then(region => setInitialRegion(region));
+
+    const keyboardDidShowListener = Keyboard.addListener(
+      'keyboardDidShow',
+      () => {
+        setKeyboardVisible(true); // or some other action
+      },
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      'keyboardDidHide',
+      () => {
+        setKeyboardVisible(false); // or some other action
+      },
+    );
+
+    return (): void => {
+      keyboardDidHideListener.remove();
+      keyboardDidShowListener.remove();
+    };
   }, []);
 
-  const updateRooms = () => {
+  const updateRooms = (): void => {
     axios.get(`http://${BACKEND_API}/party/all`).then(res => {
       setAllRooms(res.data.parties);
     });
   };
 
   const createRoom = () => {
-    const data: CreateRoom = {
+    const room: CreateRoom = {
       name: modalRoomName,
       socketId: socketId,
       coords: { ...selectedCoord } as Coordinates,
     };
 
     axios.post(
-      `http://${BACKEND_API}/party`, data)
+      `http://${BACKEND_API}/party`, room)
       .then(res => {
         updateRooms();
         toggleModalVisible();
@@ -90,7 +110,6 @@ export function Rooms({
           renderItem={({ item }) => <RoomListItem room={item}/>}
           keyExtractor={item => item.uuid}
         />
-
       </View>
 
       {modalVisible ?
@@ -106,7 +125,12 @@ export function Rooms({
             placeholder={'Write a name of the room'}
           />
 
-          <View style={styles.modalMapContainer}>
+          <View
+            style={{
+              ...styles.modalMapContainer,
+              height: isKeyboardVisible ? '65%' : '75%',
+            }}
+          >
             {initialRegion ?
               <MapView
                 style={styles.modalMap}
@@ -164,7 +188,6 @@ const styles = StyleSheet.create({
   },
 
   modalMapContainer: {
-    height: '70%',
     width: '100%',
   },
 
@@ -175,7 +198,7 @@ const styles = StyleSheet.create({
   },
 
   roomsList: {
-    padding: 20,
+    padding: 15,
     flex: 1,
   },
 
