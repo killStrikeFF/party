@@ -1,5 +1,4 @@
 import { Coordinates } from './coordinates';
-import { Client } from './client';
 
 export interface Room {
   name: string;
@@ -9,7 +8,7 @@ export interface Room {
 export interface RoomInfo extends Room {
   uuid: string;
   clientsCount: number;
-  owner?: Client;
+  owner?: string;
 }
 
 export interface CreateRoom extends Room {
