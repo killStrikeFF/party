@@ -32,19 +32,25 @@ export default function App() {
   const [isShowLoading, setIsShowLoading] = useState<boolean>(true);
 
   useEffect(() => {
+    const updateName = () => {
+      clientStorage.getClientName().then(name => {
+        setIsShowLoading(false);
+        setClientName(name);
+
+        if(name) {
+          socket.emit('updateName', { name });
+        }
+      });
+    };
+
     socket.on('connect', () => {
       setSocketId(socket.id);
+      updateName();
     });
 
     socket.connect();
     getPermissions().then(res => {
       setIsPermissionsGranted(res);
-    });
-
-    clientStorage.getClientName().then(name => {
-      setIsShowLoading(false);
-      setClientName(name);
-      socket.emit('updateName', { name });
     });
 
     return () => {

@@ -21,6 +21,7 @@ import { getUserRegion } from '../utils/userLocation';
 import MapView, { Marker } from 'react-native-maps';
 import { RoomListItem } from './RoomListItem';
 import {
+  ConnectToRoom,
   CreateRoom,
   RoomInfo,
 } from '../types/room';
@@ -53,13 +54,13 @@ export function Rooms({
     const keyboardDidShowListener = Keyboard.addListener(
       'keyboardDidShow',
       () => {
-        setKeyboardVisible(true); // or some other action
+        setKeyboardVisible(true);
       },
     );
     const keyboardDidHideListener = Keyboard.addListener(
       'keyboardDidHide',
       () => {
-        setKeyboardVisible(false); // or some other action
+        setKeyboardVisible(false);
       },
     );
 
@@ -75,7 +76,7 @@ export function Rooms({
     });
   };
 
-  const createRoom = () => {
+  const createRoom = (): void => {
     const room: CreateRoom = {
       name: modalRoomName,
       socketId: socketId,
@@ -89,25 +90,30 @@ export function Rooms({
         toggleModalVisible();
       });
   };
-  //
-  // const joinRoom = () => {
-  //     axios.post('http://192.168.0.138:3000/party/join', {socketId: socket.id, roomUuid: roomId}).then(res => {
-  //         console.log(res.data);
-  //     })
-  // }
-  //
-  // const leaveRoom = () => {
-  //     axios.post('http://192.168.0.138:3000/party/leave', {socketId: socket.id}).then(res => {
-  //         console.log(res.data);
-  //     })
-  // }
+
+  const joinRoom = (roomId: string): void => {
+    const roomConnectData: ConnectToRoom = {
+      socketId,
+      uuid: roomId,
+    };
+
+    axios.post(`http://${BACKEND_API}/party/join`, roomConnectData).then(res => updateRooms());
+  };
+
+  const leaveRoom = (): void => {
+    axios.post(`http://${BACKEND_API}/party/leave`, { socketId }).then(() => updateRooms());
+  };
 
   return (
     <View style={styles.container}>
       <View style={styles.roomsList}>
         <FlatList
           data={allRooms}
-          renderItem={({ item }) => <RoomListItem room={item}/>}
+          renderItem={({ item }) => <RoomListItem
+            room={item}
+            connectToRoom={joinRoom}
+            leaveRoom={leaveRoom}
+          />}
           keyExtractor={item => item.uuid}
         />
       </View>
