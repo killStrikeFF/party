@@ -9,8 +9,6 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import axios from 'axios';
-import { BACKEND_API } from '../utils/backend';
 import {
   Button,
   Dialog,
@@ -21,17 +19,20 @@ import { getUserRegion } from '../utils/userLocation';
 import MapView, { Marker } from 'react-native-maps';
 import { RoomListItem } from './RoomListItem';
 import {
-  ConnectToRoom,
   CreateRoom,
   RoomInfo,
 } from '../types/room';
 import { Coordinates } from '../types/coordinates';
 import { UserRegion } from '../types/user-region';
+import { RoomsDataService } from '../services/RoomsDataService';
 
 export function Rooms({
-                        socket,
+                        navigation,
                         socketId,
-                      }: any) {
+                        roomDataService,
+                      }: { navigation: any, socketId: string, roomDataService: RoomsDataService },
+) {
+
   const [allRooms, setAllRooms] = useState<RoomInfo[]>([]);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [modalRoomName, setModalRoomName] = useState<string>('');
@@ -48,7 +49,8 @@ export function Rooms({
   const [initialRegion, setInitialRegion] = useState<UserRegion>();
 
   useEffect(() => {
-    updateRooms();
+    roomDataService.rooms$.subscribe(rooms => setAllRooms(rooms));
+
     getUserRegion().then(region => setInitialRegion(region));
 
     const keyboardDidShowListener = Keyboard.addListener(
@@ -70,12 +72,6 @@ export function Rooms({
     };
   }, []);
 
-  const updateRooms = (): void => {
-    axios.get(`http://${BACKEND_API}/party/all`).then(res => {
-      setAllRooms(res.data.parties);
-    });
-  };
-
   const createRoom = (): void => {
     const room: CreateRoom = {
       name: modalRoomName,
@@ -83,25 +79,15 @@ export function Rooms({
       coords: { ...selectedCoord } as Coordinates,
     };
 
-    axios.post(
-      `http://${BACKEND_API}/party`, room)
-      .then(res => {
-        updateRooms();
-        toggleModalVisible();
-      });
+    roomDataService.createRoom(room).then(() => setModalVisible(false));
   };
 
   const joinRoom = (roomId: string): void => {
-    const roomConnectData: ConnectToRoom = {
-      socketId,
-      uuid: roomId,
-    };
-
-    axios.post(`http://${BACKEND_API}/party/join`, roomConnectData).then(res => updateRooms());
+    roomDataService.joinRoom(roomId, socketId);
   };
 
   const leaveRoom = (): void => {
-    axios.post(`http://${BACKEND_API}/party/leave`, { socketId }).then(() => updateRooms());
+    roomDataService.leaveRoom(socketId);
   };
 
   return (

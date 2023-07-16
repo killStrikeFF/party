@@ -7,25 +7,12 @@ import {
   Button,
   Input,
 } from '@rneui/themed';
-import { ClientStorage } from '../utils/client.utils';
-import { Socket } from 'socket.io-client';
 
-export function InitUser({
-                           socket,
-                           clientStorage,
-                           setClientName,
-                         }: {
-  socket: Socket,
-  clientStorage: ClientStorage,
-  setClientName: React.Dispatch<React.SetStateAction<string | null>>
-}) {
+export function InitUser({ setClientName }: { setClientName: (name: string) => void }) {
   const [clientName, changeClientName] = useState('');
 
-  const saveClientName = () => {
-    clientStorage.setClientName(clientName).then(() => {
-      socket.emit('updateName', { name: clientName });
-      setClientName(clientName);
-    });
+  const saveClientName = (): void => {
+    setClientName(clientName);
   };
 
   return (
@@ -37,7 +24,7 @@ export function InitUser({
       />
 
       <Button
-        title="Save"
+        title="Registry"
         onPress={() => saveClientName()}
         disabled={!clientName}
       />

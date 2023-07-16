@@ -1,16 +1,29 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import { BACKEND_API } from './backend';
 
 export class ClientStorage {
 
-  clientLocalStorageKey = 'clientName';
-  clientName = AsyncStorage.getItem(this.clientLocalStorageKey);
+  private readonly clientLocalStorageKey = 'clientName';
+  private readonly clientLocalStorageKeyUuid = 'uuid';
 
-  setClientName(name: string): Promise<void> {
+  public registry(name: string): Promise<void> {
+    this.setClientName(name);
+    return axios.post(`http://${BACKEND_API}/registry`, { name })
+      .then(response => this.setClientUuid(response.data.uuid));
+
+  }
+
+  public setClientName(name: string): Promise<void> {
     return AsyncStorage.setItem(this.clientLocalStorageKey, name);
   }
 
-  getClientName(): Promise<string | null> {
-    return this.clientName;
+  public setClientUuid(uuid: string): Promise<void> {
+    return AsyncStorage.setItem(this.clientLocalStorageKeyUuid, uuid);
+  }
+
+  public getClientUuid(): Promise<string | null> {
+    return AsyncStorage.getItem(this.clientLocalStorageKeyUuid);
   }
 
 }
