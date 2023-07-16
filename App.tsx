@@ -8,7 +8,6 @@ import {
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { io } from 'socket.io-client';
-import * as Location from 'expo-location';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import './UserAgent';
@@ -18,6 +17,9 @@ import { NavBar } from './components/NavBar';
 import { BACKEND_API } from './utils/backend';
 import { ClientStorage } from './utils/client.utils';
 import { InitUser } from './pages/InitUser';
+import { RoomsDataService } from './services/RoomsDataService';
+
+const roomDataService = new RoomsDataService();
 
 export default function App() {
   const Tab = createBottomTabNavigator();
@@ -27,47 +29,50 @@ export default function App() {
   });
 
   const [socketId, setSocketId] = useState<string>('');
-  const [clientName, setClientName] = useState<string | null>('');
-  const [isPermissionsGranted, setIsPermissionsGranted] = useState<boolean>(false);
+  const [clientUuid, setClientUuid] = useState<string | null>('');
   const [isShowLoading, setIsShowLoading] = useState<boolean>(true);
+  const [isConnected, setIsConnected] = useState(false);
+
+  const auth = (): void => {
+    clientStorage.getClientUuid().then(clientUuid => {
+
+      setIsShowLoading(false);
+      setClientUuid(clientUuid);
+
+      if(clientUuid) {
+        socket.on('connect', () => {
+          setSocketId(socket.id);
+          setIsConnected(true);
+        });
+
+        socket.connect();
+        socket.emit('auth', { uuid: clientUuid });
+
+        roomDataService.initRooms(socket);
+      }
+    });
+  };
+
+  const registry = (name: string): void => {
+    clientStorage.registry(name).then(() => auth());
+  };
 
   useEffect(() => {
-    const updateName = () => {
-      clientStorage.getClientName().then(name => {
-        setIsShowLoading(false);
-        setClientName(name);
+    // clientStorage.setClientUuid('');
+    auth();
 
-        if(name) {
-          socket.emit('updateName', { name });
-        }
-      });
-    };
-
-    socket.on('connect', () => {
-      setSocketId(socket.id);
-      updateName();
-    });
-
-    socket.connect();
-    getPermissions().then(res => {
-      setIsPermissionsGranted(res);
-    });
+    socket.on('disconnect', () => setIsConnected(false));
 
     return () => {
       socket.disconnect();
     };
   }, []);
 
-  const getPermissions = async () => {
-    let { status } = await Location.requestForegroundPermissionsAsync();
-    return status === 'granted';
-  };
-
   return (
     <View style={styles.container}>
       {isShowLoading ?
         <StatusBar style="auto"/> :
-        clientName ?
+        clientUuid ?
           <NavigationContainer>
             <Tab.Navigator tabBar={props => <NavBar navigation={props.navigation}/>}>
               <Tab.Screen name="Map">
@@ -77,21 +82,26 @@ export default function App() {
                     socket={socket}
                   />}
               </Tab.Screen>
-              <Tab.Screen name="Rooms">
-                {props =>
-                  <Rooms
-                    navigation={props.navigation}
-                    socket={socket}
-                    socketId={socketId}
-                  />}
-              </Tab.Screen>
+              {roomDataService ?
+                <Tab.Screen name="Rooms">
+                  {props =>
+                    <Rooms
+                      navigation={props.navigation}
+                      socketId={socketId}
+                      roomDataService={roomDataService}
+                    />}
+                </Tab.Screen>
+                : null}
             </Tab.Navigator>
+
+            <View
+              style={{
+                ...styles.isConnectedIndicator,
+                backgroundColor: isConnected ? 'green' : 'red',
+              }}
+            ></View>
           </NavigationContainer> :
-          <InitUser
-            clientStorage={clientStorage}
-            socket={socket}
-            setClientName={setClientName}
-          />
+          <InitUser setClientName={registry}/>
       }
     </View>
   );
@@ -100,5 +110,13 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  isConnectedIndicator: {
+    width: 10,
+    height: 10,
+    borderRadius: 50,
+    position: 'absolute',
+    top: 25,
+    right: 25,
   },
 });
