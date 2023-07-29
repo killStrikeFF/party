@@ -20,7 +20,7 @@ export function InitUser({ setClientName }: { setClientName: (name: string) => v
       <Input
         onChangeText={changeClientName}
         value={clientName}
-        placeholder={'Write your name, cocksucker'}
+        placeholder={'Write your name'}
       />
 
       <Button

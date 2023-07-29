@@ -18,15 +18,19 @@ import { BACKEND_API } from './utils/backend';
 import { ClientStorage } from './utils/client.utils';
 import { InitUser } from './pages/InitUser';
 import { RoomsDataService } from './services/RoomsDataService';
+import { UserLocationTracking } from './utils/userLocationTracking';
 
-const roomDataService = new RoomsDataService();
+export const socket = io(`ws://${BACKEND_API}`, {
+  autoConnect: false,
+});
+
+export const roomDataService = new RoomsDataService(socket);
+export const clientStorage = new ClientStorage();
+
+export const userLocationTracking = new UserLocationTracking(socket, roomDataService);
 
 export default function App() {
   const Tab = createBottomTabNavigator();
-  const clientStorage = new ClientStorage();
-  const socket = io(`ws://${BACKEND_API}`, {
-    autoConnect: false,
-  });
 
   const [socketId, setSocketId] = useState<string>('');
   const [clientUuid, setClientUuid] = useState<string | null>('');
@@ -35,7 +39,6 @@ export default function App() {
 
   const auth = (): void => {
     clientStorage.getClientUuid().then(clientUuid => {
-
       setIsShowLoading(false);
       setClientUuid(clientUuid);
 
@@ -47,9 +50,13 @@ export default function App() {
 
         socket.connect();
         socket.emit('auth', { uuid: clientUuid });
-
-        roomDataService.initRooms(socket);
       }
+
+      socket.on('isAuthorized', (isAuthed: { auth: boolean }) => {
+        if(!isAuthed.auth) {
+          setClientUuid('');
+        }
+      });
     });
   };
 
@@ -58,10 +65,10 @@ export default function App() {
   };
 
   useEffect(() => {
-    // clientStorage.setClientUuid('');
     auth();
-
-    socket.on('disconnect', () => setIsConnected(false));
+    socket.on('disconnect', () => {
+      setIsConnected(false);
+    });
 
     return () => {
       socket.disconnect();
@@ -79,7 +86,8 @@ export default function App() {
                 {props =>
                   <Map
                     navigation={props.navigation}
-                    socket={socket}
+                    roomDataService={roomDataService}
+                    userLocationTracking={userLocationTracking}
                   />}
               </Tab.Screen>
               {roomDataService ?
@@ -87,8 +95,9 @@ export default function App() {
                   {props =>
                     <Rooms
                       navigation={props.navigation}
-                      socketId={socketId}
+                      clientUuid={clientUuid}
                       roomDataService={roomDataService}
+                      userLocationTracking={userLocationTracking}
                     />}
                 </Tab.Screen>
                 : null}

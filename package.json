@@ -6,7 +6,8 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "build-apk": "eas build -p android --profile preview"
   },
   "dependencies": {
     "@expo/webpack-config": "^18.0.1",
@@ -29,7 +30,8 @@
     "react-native-screens": "~3.20.0",
     "react-native-web": "~0.18.10",
     "rxjs": "^7.8.1",
-    "socket.io-client": "^4.6.1"
+    "socket.io-client": "^4.6.1",
+    "expo-dev-client": "~2.2.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

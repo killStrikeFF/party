@@ -15,7 +15,6 @@ import {
   Input,
   Text,
 } from '@rneui/themed';
-import { getUserRegion } from '../utils/userLocation';
 import MapView, { Marker } from 'react-native-maps';
 import { RoomListItem } from './RoomListItem';
 import {
@@ -25,12 +24,19 @@ import {
 import { Coordinates } from '../types/coordinates';
 import { UserRegion } from '../types/user-region';
 import { RoomsDataService } from '../services/RoomsDataService';
+import { UserLocationTracking } from '../utils/userLocationTracking';
 
 export function Rooms({
                         navigation,
-                        socketId,
+                        clientUuid,
                         roomDataService,
-                      }: { navigation: any, socketId: string, roomDataService: RoomsDataService },
+                        userLocationTracking,
+                      }: {
+                        navigation: any,
+                        clientUuid: string,
+                        roomDataService: RoomsDataService,
+                        userLocationTracking: UserLocationTracking
+                      },
 ) {
 
   const [allRooms, setAllRooms] = useState<RoomInfo[]>([]);
@@ -51,7 +57,7 @@ export function Rooms({
   useEffect(() => {
     roomDataService.rooms$.subscribe(rooms => setAllRooms(rooms));
 
-    getUserRegion().then(region => setInitialRegion(region));
+    userLocationTracking.initialRegion$.subscribe(region => setInitialRegion(region));
 
     const keyboardDidShowListener = Keyboard.addListener(
       'keyboardDidShow',
@@ -75,19 +81,19 @@ export function Rooms({
   const createRoom = (): void => {
     const room: CreateRoom = {
       name: modalRoomName,
-      socketId: socketId,
+      uuid: clientUuid,
       coords: { ...selectedCoord } as Coordinates,
     };
 
     roomDataService.createRoom(room).then(() => setModalVisible(false));
   };
 
-  const joinRoom = (roomId: string): void => {
-    roomDataService.joinRoom(roomId, socketId);
+  const joinRoom = (roomUuid: string): void => {
+    roomDataService.joinRoom(roomUuid, clientUuid);
   };
 
   const leaveRoom = (): void => {
-    roomDataService.leaveRoom(socketId);
+    roomDataService.leaveRoom(clientUuid);
   };
 
   return (

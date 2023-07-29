@@ -12,10 +12,12 @@ export interface RoomInfo extends Room {
 }
 
 export interface CreateRoom extends Room {
-  socketId: string;
+  uuid: string;
 }
 
 export interface ConnectToRoom {
-  socketId: string;
-  uuid: string;
+  roomUuid: string;
+  clientUuid: string;
 }
+
+export type ClientCoordinatesForRoomDto = Coordinates;
