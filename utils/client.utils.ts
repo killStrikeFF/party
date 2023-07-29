@@ -8,10 +8,11 @@ export class ClientStorage {
   private readonly clientLocalStorageKeyUuid = 'uuid';
 
   public registry(name: string): Promise<void> {
-    this.setClientName(name);
     return axios.post(`http://${BACKEND_API}/registry`, { name })
-      .then(response => this.setClientUuid(response.data.uuid));
-
+      .then(response => {
+        this.setClientName(name);
+        return this.setClientUuid(response.data.uuid);
+      });
   }
 
   public setClientName(name: string): Promise<void> {
@@ -25,5 +26,4 @@ export class ClientStorage {
   public getClientUuid(): Promise<string | null> {
     return AsyncStorage.getItem(this.clientLocalStorageKeyUuid);
   }
-
 }

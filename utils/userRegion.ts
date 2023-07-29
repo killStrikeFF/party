@@ -4,11 +4,11 @@ import { regionFrom } from './calculateRegion';
 import { Coordinates } from '../types/coordinates';
 import { UserRegion } from '../types/user-region';
 
-export const getUserLocation = async (): Promise<LocationObject> => {
+const getUserLocation = async (): Promise<LocationObject> => {
   return Location.getCurrentPositionAsync();
 };
 
-export const getUserCoordinates = async (): Promise<Coordinates> => {
+const getUserCoordinates = async (): Promise<Coordinates> => {
   return getUserLocation().then(loc => ({
     longitude: loc.coords.longitude,
     latitude: loc.coords.latitude,

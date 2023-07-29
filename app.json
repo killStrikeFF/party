@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Party",
-    "slug": "Party",
+    "name": "party",
+    "slug": "party",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -15,12 +15,35 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.killstrikeff.party",
+      "buildNumber": "1.0.0",
+      "infoPlist": {
+        "UIBackgroundModes": [
+          "location",
+          "fetch"
+        ]
+      }
     },
     "android": {
+      "package": "com.killstrikeff.party",
+      "permissions": [
+        "ACCESS_BACKGROUND_LOCATION"
+      ],
+      "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
+      },
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyCe2SesRTBZEW2zfxSNhh6-_KVZs_swQl8"
+        }
+      }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "7e2d2736-0a3f-4786-9785-df386478e51b"
       }
     },
     "web": {
@@ -30,7 +53,8 @@
       [
         "expo-location",
         {
-          "isAndroidBackgroundLocationEnabled": true
+          "isAndroidBackgroundLocationEnabled": true,
+          "locationAlwaysAndWhenInUsePermission": "Allow Party to use your location."
         }
       ]
     ]
