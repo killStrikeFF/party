@@ -27,12 +27,10 @@ import { RoomsDataService } from '../services/RoomsDataService';
 import { UserLocationTracking } from '../utils/userLocationTracking';
 
 export function Rooms({
-                        navigation,
                         clientUuid,
                         roomDataService,
                         userLocationTracking,
                       }: {
-                        navigation: any,
                         clientUuid: string,
                         roomDataService: RoomsDataService,
                         userLocationTracking: UserLocationTracking
