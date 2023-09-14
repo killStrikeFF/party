@@ -19,26 +19,41 @@ import {
   of,
   switchMap,
 } from 'rxjs';
+import { ChatDrawer } from './ChatDrawer';
+import { InputMessage } from '../components/InputMessage';
+import { ChatDataService } from '../services/chat-data.service';
+import {
+  Button,
+  Icon,
+} from '@rneui/themed';
 
 export function Map({
-                      navigation,
                       roomDataService,
                       userLocationTracking,
+                      chatDataService,
+                      currentClientUuid,
+                      toggleIsVisisbleModalRooms,
                     }: {
-  navigation: any,
   roomDataService: RoomsDataService,
-  userLocationTracking: UserLocationTracking
+  userLocationTracking: UserLocationTracking,
+  chatDataService: ChatDataService,
+  currentClientUuid: string,
+  toggleIsVisisbleModalRooms: () => void,
 }) {
   const [clients, setClients] = useState<ClientCoordinates[]>([]);
   const [initialRegion, setInitialRegion] = useState<UserRegion>();
+  const [isShowInputMessage, setIsShowInputMessage] = useState(false);
+  const [isShowChat, setIsShowChat] = useState(false);
 
   useEffect(() => {
     roomDataService.connectedRoomId$.pipe(
       switchMap(connectedRoomId => {
         if(connectedRoomId) {
+          setIsShowChat(true);
           return roomDataService.clientsCoordinatesRoom$;
         }
 
+        setIsShowChat(false);
         return of([]);
       }),
     ).subscribe(res => setClients(res));
@@ -67,6 +82,40 @@ export function Map({
           ))}
         </MapView> :
         <ActivityIndicator size={'large'}/>}
+
+      {isShowChat ?
+        <ChatDrawer
+          setIsShowContent={setIsShowInputMessage}
+          chatDataService={chatDataService}
+          currentClientUuid={currentClientUuid}
+        ></ChatDrawer>
+
+        : null}
+
+      {isShowChat ?
+        <InputMessage
+          isShowInputMessage={isShowInputMessage}
+          chatDataService={chatDataService}
+        ></InputMessage>
+        : null}
+
+      <View style={styles.actionsContainer}>
+        <Button
+          radius={'sm'}
+          type="outline"
+          buttonStyle={{
+            backgroundColor: 'white',
+            borderColor: 'black',
+            zIndex: 1,
+          }}
+          onPress={toggleIsVisisbleModalRooms}
+        >
+          <Icon
+            name="meeting-room"
+            color="black"
+          />
+        </Button>
+      </View>
     </View>
   );
 }
@@ -80,5 +129,27 @@ const styles = StyleSheet.create({
     flex: 1,
     width: 'auto',
     height: 'auto',
+  },
+  message: {
+    flex: 1,
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
+    height: 50,
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    columnGap: 10,
+    paddingRight: 10,
+    zIndex: 1000,
+    backgroundColor: 'white',
+    borderTopWidth: 1,
+    borderTopColor: '#aeaeae',
+  },
+  actionsContainer: {
+    position: 'absolute',
+    top: '15%',
+    right: '5%',
+    zIndex: 0,
   },
 });

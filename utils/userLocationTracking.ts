@@ -31,21 +31,33 @@ export class UserLocationTracking {
 
     requestPermissions().then(() => getUserRegion()).then((userRegion) => {
       this.initialRegion$.next(userRegion);
-      this.initBackgroundDefineLocationTask();
-      this.startTrackingBackground();
     });
+
+    this.roomDataService.connectedRoomId$.subscribe(roomId => {
+      if(roomId) {
+        this.initBackgroundDefineLocationTask();
+        this.startTrackingBackground();
+      } else {
+        this.stopTrackingBackground();
+      }
+    });
+  }
+
+  private async stopTrackingBackground(): Promise<void> {
+    const hasStarted = await Location.hasStartedLocationUpdatesAsync(this.backgroundTaskName);
+    if(hasStarted) {
+      await Location.stopLocationUpdatesAsync(this.backgroundTaskName);
+    }
   }
 
   private async startTrackingBackground(): Promise<void> {
     const { granted } = await Location.getBackgroundPermissionsAsync();
     if(!granted) {
-      console.log('location tracking denied');
       return;
     }
 
     const isTaskDefined = await TaskManager.isTaskDefined(this.backgroundTaskName);
     if(!isTaskDefined) {
-      console.log('Task is not defined');
       return;
     }
 
@@ -54,11 +66,9 @@ export class UserLocationTracking {
     );
 
     if(hasStarted) {
-      console.log('Already started');
       return;
     }
 
-    console.log('strart');
     await Location.startLocationUpdatesAsync(this.backgroundTaskName, {
       accuracy: Location.Accuracy.BestForNavigation,
       showsBackgroundLocationIndicator: true,
@@ -93,7 +103,6 @@ export class UserLocationTracking {
                 latitude: location.coords.latitude,
                 longitude: location.coords.longitude,
               };
-              console.log('emit background', clientCoordinatesForRoom);
               this.socket.emit('updateClientCoordinates', clientCoordinatesForRoom);
             });
           }
