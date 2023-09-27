@@ -13,43 +13,43 @@ import React, {
 } from 'react';
 import { ClientCoordinates } from '../types/client-coordinates';
 import { UserRegion } from '../types/user-region';
-import { RoomsDataService } from '../services/RoomsDataService';
-import { UserLocationTracking } from '../utils/userLocationTracking';
 import {
   of,
   switchMap,
 } from 'rxjs';
 import { ChatDrawer } from './ChatDrawer';
 import { InputMessage } from '../components/InputMessage';
-import { ChatDataService } from '../services/chat-data.service';
 import {
   Button,
   Icon,
 } from '@rneui/themed';
+import {RootStackParamList, ROUTES} from "../types/routes";
+import {RouteProp} from "@react-navigation/native";
+import {NativeStackNavigationProp} from "@react-navigation/native-stack";
 
-export function Map({
-                      roomDataService,
-                      userLocationTracking,
-                      chatDataService,
-                      currentClientUuid,
-                      toggleIsVisisbleModalRooms,
-                    }: {
-  roomDataService: RoomsDataService,
-  userLocationTracking: UserLocationTracking,
-  chatDataService: ChatDataService,
-  currentClientUuid: string,
-  toggleIsVisisbleModalRooms: () => void,
-}) {
+interface MapProps {
+  route: RouteProp<RootStackParamList, ROUTES.MAP>;
+  navigation: NativeStackNavigationProp<RootStackParamList, ROUTES.MAP>;
+}
+
+export const Map = ({navigation, route}: MapProps) => {
+  const {roomDataService, chatDataService, currentClientUuid, userLocationTracking} = route.params
+
   const [clients, setClients] = useState<ClientCoordinates[]>([]);
   const [initialRegion, setInitialRegion] = useState<UserRegion>();
   const [isShowInputMessage, setIsShowInputMessage] = useState(false);
   const [isShowChat, setIsShowChat] = useState(false);
+
+  const openRoomList = () => {
+    navigation.navigate(ROUTES.ROOMS, {roomDataService, userLocationTracking, clientUuid: currentClientUuid})
+  }
 
   useEffect(() => {
     roomDataService.connectedRoomId$.pipe(
       switchMap(connectedRoomId => {
         if(connectedRoomId) {
           setIsShowChat(true);
+          console.log('chat connected')
           return roomDataService.clientsCoordinatesRoom$;
         }
 
@@ -101,6 +101,21 @@ export function Map({
 
       <View style={styles.actionsContainer}>
         <Button
+            radius={'sm'}
+            type="outline"
+            buttonStyle={{
+              backgroundColor: 'white',
+              borderColor: 'black',
+              zIndex: 1,
+            }}
+        >
+          <Icon
+              name="settings"
+              color="black"
+          />
+        </Button>
+
+        <Button
           radius={'sm'}
           type="outline"
           buttonStyle={{
@@ -108,7 +123,7 @@ export function Map({
             borderColor: 'black',
             zIndex: 1,
           }}
-          onPress={toggleIsVisisbleModalRooms}
+          onPress={openRoomList}
         >
           <Icon
             name="meeting-room"
@@ -124,6 +139,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
+    position: "relative"
   },
   map: {
     flex: 1,
@@ -148,8 +164,9 @@ const styles = StyleSheet.create({
   },
   actionsContainer: {
     position: 'absolute',
-    top: '15%',
+    top: '10%',
     right: '5%',
     zIndex: 0,
+    gap: 12,
   },
 });
