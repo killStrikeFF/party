@@ -23,19 +23,17 @@ import {
 } from '../types/room';
 import { Coordinates } from '../types/coordinates';
 import { UserRegion } from '../types/user-region';
-import { RoomsDataService } from '../services/RoomsDataService';
-import { UserLocationTracking } from '../utils/userLocationTracking';
+import { RouteProp } from "@react-navigation/native";
+import { RootStackParamList, ROUTES } from "../types/routes";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
-export function Rooms({
-                        clientUuid,
-                        roomDataService,
-                        userLocationTracking,
-                      }: {
-                        clientUuid: string,
-                        roomDataService: RoomsDataService,
-                        userLocationTracking: UserLocationTracking
-                      },
-) {
+interface RoomsProps {
+  route: RouteProp<RootStackParamList, ROUTES.ROOMS>;
+  navigation: NativeStackNavigationProp<RootStackParamList, ROUTES.ROOMS>;
+}
+
+export function Rooms({navigation, route}: RoomsProps) {
+  const { clientUuid, roomDataService, userLocationTracking } = route.params
 
   const [allRooms, setAllRooms] = useState<RoomInfo[]>([]);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
