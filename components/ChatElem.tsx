@@ -7,7 +7,7 @@ import { Text } from '@rneui/themed';
 
 export interface ChatElemProps {
   chatNode: ChatNode;
-  currentClientUuid: string;
+  currentClientUuid?: string;
 }
 
 export function ChatElem({

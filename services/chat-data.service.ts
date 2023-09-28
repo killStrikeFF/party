@@ -21,7 +21,7 @@ export class ChatDataService {
 
   private subscribeOnChatMessages(): void {
     this.socket.on(ChatEvents.ChatEvents, (chatMessages: ChatNode[] | ChatNode) => {
-      if(Array.isArray(chatMessages)) {
+      if (Array.isArray(chatMessages)) {
         this.chatMessages$.next(chatMessages);
       } else {
         const messages = this.chatMessages$.getValue();

@@ -1,4 +1,3 @@
-import { Socket } from 'socket.io-client';
 import {
   BehaviorSubject,
   take,
@@ -11,6 +10,7 @@ import {
 import axios from 'axios';
 import { BACKEND_API } from '../utils/backend';
 import { ClientCoordinates } from '../types/client-coordinates';
+import { socket } from '../utils/shared.utils';
 
 export class RoomsDataService {
 
@@ -18,7 +18,7 @@ export class RoomsDataService {
   public readonly connectedRoomId$ = new BehaviorSubject<string>('');
   public readonly clientsCoordinatesRoom$ = new BehaviorSubject<ClientCoordinates[]>([]);
 
-  constructor(private readonly socket: Socket) {
+  constructor() {
     socket.on('allParties', response => {
       this.rooms$.next(response.parties);
     });
@@ -28,7 +28,7 @@ export class RoomsDataService {
   }
 
   public updateAllRooms(): void {
-    this.socket?.emit('updateAllParties');
+    socket.emit('updateAllParties');
   }
 
   public createRoom(roomDto: CreateRoom): Promise<void> {
@@ -60,9 +60,9 @@ export class RoomsDataService {
   };
 
   private subscribeOnClientsCoordinatesOfRoom(): void {
-    this.socket?.on('clientsCoordinates', (res) => {
+    socket.on('clientsCoordinates', (res) => {
       this.connectedRoomId$.pipe(take(1)).subscribe(coonectedRoomId => {
-        if(coonectedRoomId) {
+        if (coonectedRoomId) {
           this.clientsCoordinatesRoom$.next(res);
         } else {
           this.clientsCoordinatesRoom$.next([]);

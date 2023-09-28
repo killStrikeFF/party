@@ -16,8 +16,8 @@ import {
 } from 'react';
 import { Icon } from '@rneui/themed';
 import { ChatNode } from '../types/messages';
-import { ChatDataService } from '../services/chat-data.service';
 import { ChatElem } from '../components/ChatElem';
+import { chatDataService } from '../utils/shared.utils';
 
 const { height } = Dimensions.get('window');
 
@@ -77,15 +77,13 @@ interface BottomDrawerProps {
   children?: React.ReactNode;
   onDrawerStateChange?: (nextState: DrawerState) => void;
   setIsShowContent: (isShow: boolean) => void;
-  chatDataService: ChatDataService,
-  currentClientUuid: string,
+  currentClientUuid?: string,
 }
 
 export function ChatDrawer({
                              children,
                              onDrawerStateChange,
                              setIsShowContent,
-                             chatDataService,
                              currentClientUuid,
                            }: BottomDrawerProps) {
   const { height } = Dimensions.get('window');
@@ -109,7 +107,7 @@ export function ChatDrawer({
   };
 
   const openMessages = (): void => {
-    if(numberState === DrawerState.Closed) {
+    if (numberState === DrawerState.Closed) {
       setIsShowContent(true);
       animateMove(y, DrawerState.Peek);
       setNumberState(DrawerState.Peek);
@@ -125,7 +123,7 @@ export function ChatDrawer({
     state.setValue(nextState);
     setNumberState(nextState);
 
-    if(nextState === DrawerState.Peek) {
+    if (nextState === DrawerState.Peek) {
       Keyboard.dismiss();
     }
 
@@ -154,7 +152,7 @@ export function ChatDrawer({
       setIsShownKeyboard(() => true);
       setHeightKeyboard(event.endCoordinates.height);
 
-      if(numberState !== DrawerState.Open) {
+      if (numberState !== DrawerState.Open) {
         animateMove(y, DrawerState.Open, onDrawerStateChange?.(DrawerState.Open));
         setNumberState(DrawerState.Open);
       }

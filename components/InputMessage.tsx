@@ -13,7 +13,7 @@ import React, {
   useState,
 } from 'react';
 import { DrawerState } from '../pages/ChatDrawer';
-import { ChatDataService } from '../services/chat-data.service';
+import { chatDataService } from '../utils/shared.utils';
 
 export enum InputMessageDrawState {
   Open = 0,
@@ -32,22 +32,19 @@ export const animateMoveInputMessage = (
 };
 
 export const getNextStateInputMessage = (currentState: InputMessageDrawState): InputMessageDrawState => {
-  if(currentState === InputMessageDrawState.Open) {
+  if (currentState === InputMessageDrawState.Open) {
     return InputMessageDrawState.Closed;
   }
 
   return InputMessageDrawState.Open;
 };
 
-export function InputMessage({
-                               isShowInputMessage,
-                               chatDataService,
-                             }: { isShowInputMessage: boolean, chatDataService: ChatDataService }) {
+export function InputMessage({ isShowInputMessage }: { isShowInputMessage: boolean }) {
   const [message, setMessage] = useState('');
   const y = useRef(new Animated.Value(DrawerState.Closed)).current;
 
   const sendMessage = (): void => {
-    if(message.trim().length) {
+    if (message.trim().length) {
       chatDataService.sendMessage(message.trim());
       setMessage('');
     }

@@ -1,4 +1,7 @@
-import {useEffect, useState} from 'react';
+import {
+  useEffect,
+  useState,
+} from 'react';
 import {
   StyleSheet,
   View,
@@ -7,38 +10,43 @@ import {
   Button,
   Input,
 } from '@rneui/themed';
-import {RouteProp} from "@react-navigation/native";
-import {RootStackParamList, ROUTES} from "../types/routes";
-import {NativeStackNavigationProp} from "@react-navigation/native-stack";
+import { RouteProp } from '@react-navigation/native';
+import {
+  RootStackParamList,
+  ROUTES,
+} from '../types/routes';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import {
+  clientStorage,
+  socket,
+} from '../utils/shared.utils';
 
 interface InitUserProps {
   route: RouteProp<RootStackParamList, ROUTES.INIT_USER>;
   navigation: NativeStackNavigationProp<RootStackParamList, ROUTES.INIT_USER>;
 }
 
-export function InitUser({ navigation, route }: InitUserProps) {
-  const {socket, clientStorage, roomDataService, userLocationTracking, chatDataService} = route.params
+export function InitUser({
+                           navigation,
+                           route,
+                         }: InitUserProps) {
 
   const [clientName, changeClientName] = useState('');
   const [socketId, setSocketId] = useState<string>('');
   const [clientUuid, setClientUuid] = useState<string | null>('');
 
-
   const saveClientName = (): void => {
-      clientStorage.registry(clientName).then(() => auth());
+    clientStorage.registry(clientName).then(() => auth());
   };
 
   const auth = (): void => {
     clientStorage.getClientUuid().then(clientUuid => {
       setClientUuid(clientUuid);
 
-      if(clientUuid) {
+      if (clientUuid) {
         socket.on('connect', () => {
           setSocketId(socket.id);
-        });
-
-        socket.on('disconnect', () => {
-          socket.connect();
+          setClientUuid(clientUuid);
         });
 
         socket.connect();
@@ -46,22 +54,17 @@ export function InitUser({ navigation, route }: InitUserProps) {
       }
 
       socket.on('isAuthorized', (isAuthed: { auth: boolean }) => {
+        if (isAuthed.auth) {
           navigation.navigate(ROUTES.MAP, {
-            roomDataService,
-            userLocationTracking,
-            chatDataService,
-            currentClientUuid: clientUuid as string
-          })
+            currentClientUuid: clientUuid as string,
+          });
+        }
       });
     });
   };
 
   useEffect(() => {
     auth();
-
-    return () => {
-      socket.disconnect();
-    };
   }, []);
 
   return (
