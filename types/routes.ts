@@ -9,6 +9,7 @@ export type RootStackParamList = {
   [ROUTES.MAP]: { currentClientUuid: string };
   [ROUTES.ROOMS]: { clientUuid: string };
   [ROUTES.INIT_USER]: {};
+  [ROUTES.SETTINGS]: {};
 };
 
 

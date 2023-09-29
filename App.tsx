@@ -15,6 +15,7 @@ import { Rooms } from './pages/Rooms';
 import { InitUser } from './pages/InitUser';
 import { useEffect } from 'react';
 import { socket } from './utils/shared.utils';
+import {Settings} from "./pages/Settings";
 
 export default function App() {
   const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -47,6 +48,10 @@ export default function App() {
           <Stack.Screen
             name={ROUTES.ROOMS}
             component={Rooms}
+          />
+          <Stack.Screen
+              name={ROUTES.SETTINGS}
+              component={Settings}
           />
         </Stack.Navigator>
       </NavigationContainer>

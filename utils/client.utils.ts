@@ -3,7 +3,6 @@ import axios from 'axios';
 import { BACKEND_API } from './backend';
 
 export class ClientStorage {
-
   private readonly clientLocalStorageKey = 'clientName';
   private readonly clientLocalStorageKeyUuid = 'uuid';
 
@@ -13,6 +12,22 @@ export class ClientStorage {
         this.setClientName(name);
         return this.setClientUuid(response.data.uuid);
       });
+  }
+
+  public updateUserInfo({
+                          name,
+                          image,
+                        }: { name?: string, image?: string }): Promise<void> {
+    return this.getClientUuid().then(uuid => {
+      return axios.patch(
+        `http://${BACKEND_API}/user-info`,
+        {
+          name,
+          image,
+          uuid,
+        },
+      );
+    });
   }
 
   public setClientName(name: string): Promise<void> {
@@ -25,5 +40,9 @@ export class ClientStorage {
 
   public getClientUuid(): Promise<string | null> {
     return AsyncStorage.getItem(this.clientLocalStorageKeyUuid);
+  }
+
+  public getClientName(): Promise<string | null> {
+    return AsyncStorage.getItem(this.clientLocalStorageKey);
   }
 }
