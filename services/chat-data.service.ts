@@ -10,6 +10,8 @@ export enum ChatEvents {
 export class ChatDataService {
 
   public readonly chatMessages$ = new BehaviorSubject<ChatNode[]>([]);
+  public readonly isShownChat$ = new BehaviorSubject(false);
+  public readonly isClosedChat$ = new BehaviorSubject(true);
 
   constructor(private readonly socket: Socket) {
     this.subscribeOnChatMessages();
@@ -17,6 +19,14 @@ export class ChatDataService {
 
   public sendMessage(message: string): void {
     this.socket.emit(ChatEvents.SendChatMessage, { message });
+  }
+
+  public setIsShownChat(isShown: boolean): void {
+    this.isShownChat$.next(isShown);
+  }
+
+  public setIsClosedChat(isClosed: boolean): void {
+    this.isClosedChat$.next(isClosed);
   }
 
   private subscribeOnChatMessages(): void {

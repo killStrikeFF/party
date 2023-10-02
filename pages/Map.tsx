@@ -1,5 +1,6 @@
 import {
   ActivityIndicator,
+  BackHandler,
   StyleSheet,
   View,
 } from 'react-native';
@@ -14,6 +15,7 @@ import React, {
 import { ClientCoordinates } from '../types/client-coordinates';
 import { UserRegion } from '../types/user-region';
 import {
+  combineLatest,
   of,
   switchMap,
 } from 'rxjs';
@@ -30,6 +32,7 @@ import {
 import { RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
+  chatDataService,
   clientStorage,
   roomDataService,
   userLocationTracking,
@@ -58,11 +61,23 @@ export const Map = ({
     );
   };
 
+  const hardwareBackPress = () => {
+    if (!chatDataService.isClosedChat$.getValue()) {
+      chatDataService.setIsClosedChat(true);
+      return true;
+    }
+
+    return false;
+  };
+
   const openSettings = () => {
     navigation.navigate(ROUTES.SETTINGS, {})
   }
 
+
   useEffect(() => {
+    BackHandler.addEventListener('hardwareBackPress', hardwareBackPress);
+
     navigation.navigate(ROUTES.INIT_USER, {});
     clientStorage.getClientUuid().then(clientUuid => {
       if (clientUuid) {
@@ -70,19 +85,36 @@ export const Map = ({
       }
     });
 
+    combineLatest([
+      chatDataService.isShownChat$,
+      roomDataService.connectedRoomId$,
+    ]).subscribe(([isShownChat, connectedRoomId]) => {
+      if (isShownChat && connectedRoomId) {
+        return setIsShowChat(true);
+      }
+
+      setIsShowChat(false);
+    });
+
     roomDataService.connectedRoomId$.pipe(
       switchMap(connectedRoomId => {
+        chatDataService.setIsShownChat(Boolean(connectedRoomId));
+        chatDataService.setIsClosedChat(Boolean(connectedRoomId));
         if (connectedRoomId) {
-          setIsShowChat(true);
           return roomDataService.clientsCoordinatesRoom$;
         }
 
-        setIsShowChat(false);
         return of([]);
       }),
     ).subscribe(res => setClients(res));
+
     userLocationTracking.initialRegion$.subscribe(region => setInitialRegion(region));
-  }, []);
+
+    return () => {
+      BackHandler.removeEventListener('hardwareBackPress', hardwareBackPress);
+    };
+  }, [navigation]);
+
   return (
     <View style={styles.container}>
       {initialRegion ?
