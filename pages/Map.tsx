@@ -58,6 +58,10 @@ export const Map = ({
     );
   };
 
+  const openSettings = () => {
+    navigation.navigate(ROUTES.SETTINGS, {})
+  }
+
   useEffect(() => {
     navigation.navigate(ROUTES.INIT_USER, {});
     clientStorage.getClientUuid().then(clientUuid => {
@@ -122,6 +126,7 @@ export const Map = ({
             borderColor: 'black',
             zIndex: 1,
           }}
+          onPress={openSettings}
         >
           <Icon
             name="settings"
