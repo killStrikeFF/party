@@ -83,7 +83,7 @@ export const Settings = ({
           },
         ).then(resized => {
           clientStorage.updateUserInfo({ image: resized.base64 }).then(() => {
-            setUserImage(resized.uri);
+            setUserImage(resized.base64);
           });
         });
 
