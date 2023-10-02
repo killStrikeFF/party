@@ -82,7 +82,7 @@ export function Rooms({
       keyboardDidHideListener.remove();
       keyboardDidShowListener.remove();
     };
-  }, []);
+  }, [navigation]);
 
   const createRoom = (): void => {
     const room: CreateRoom = {

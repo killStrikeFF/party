@@ -9,7 +9,7 @@ export const socket = io(`ws://${BACKEND_API}`, {
   autoConnect: false,
 });
 
-export const roomDataService = new RoomsDataService();
+export const roomDataService = new RoomsDataService(socket);
 export const clientStorage = new ClientStorage();
 export const chatDataService = new ChatDataService(socket);
 export const userLocationTracking = new UserLocationTracking(socket, roomDataService);
