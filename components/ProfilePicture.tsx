@@ -40,7 +40,7 @@ export const ProfilePicture = ({
       {image ?
         <Image
           style={styles.profilePicture}
-          source={{ uri: `data:image/jpg;base64,${image}` }}
+          source={{ uri: `data:image/png;base64,${image}` }}
         /> :
         <View style={styles.picturePlaceholder}>
           <Text

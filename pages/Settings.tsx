@@ -21,6 +21,10 @@ import {
   Text,
 } from '@rneui/themed';
 import * as ImagePicker from 'expo-image-picker';
+import {
+  manipulateAsync,
+  SaveFormat,
+} from 'expo-image-manipulator';
 
 interface SettingsProps {
   route: RouteProp<RootStackParamList, ROUTES.SETTINGS>;
@@ -59,13 +63,30 @@ export const Settings = ({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [1, 1],
-      base64: true,
     }).then(res => {
-      if (res.assets && res.assets[0]?.base64) {
-        const base64Img = res.assets[0].base64;
-        clientStorage.updateUserInfo({ image: base64Img }).then(() => {
-          setUserImage(base64Img);
+      if (res.assets && res.assets[0]?.uri) {
+        const img = res.assets[0].uri;
+
+        manipulateAsync(
+          img,
+          [
+            {
+              resize: {
+                width: 128,
+                height: 128,
+              },
+            },
+          ],
+          {
+            format: SaveFormat.PNG,
+            base64: true,
+          },
+        ).then(resized => {
+          clientStorage.updateUserInfo({ image: resized.base64 }).then(() => {
+            setUserImage(resized.base64);
+          });
         });
+
       }
     });
   };
