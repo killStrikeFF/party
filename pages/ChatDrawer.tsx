@@ -28,25 +28,20 @@ export enum DrawerState {
   Closed = 0,
 }
 
-const numberDrawerStates = Object.values(DrawerState).filter(elem => typeof elem === 'number');
-
 export const animateMove = (
   y: Animated.Value,
   toValue: number | Animated.Value,
   isSkipUpdate = false,
 ) => {
-  if (numberDrawerStates.includes(toValue as number)) {
-    const isClosedChat = toValue === DrawerState.Closed;
-    if (isClosedChat !== chatDataService.isClosedChat$.getValue() && numberDrawerStates.includes(toValue as number) && !isSkipUpdate) {
-      chatDataService.setIsClosedChat(isClosedChat);
-    }
-
-    Animated.spring(y, {
-      toValue: -toValue,
-      tension: 20,
-      useNativeDriver: true,
-    }).start((finished) => true);
+  const isClosedChat = toValue === DrawerState.Closed;
+  if (isClosedChat !== chatDataService.isClosedChat$.getValue()) {
+    chatDataService.setIsClosedChat(isClosedChat);
   }
+
+  Animated.spring(y, {
+    toValue: -toValue,
+    useNativeDriver: true,
+  }).start((finished) => true);
 };
 
 export const getNextState = (
