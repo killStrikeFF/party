@@ -15,7 +15,7 @@ import {
   useEffect,
   useState,
 } from 'react';
-import { clientStorage } from '../utils/shared.utils';
+import { userStorage } from '../utils/shared.utils';
 import {
   Button,
   Text,
@@ -35,27 +35,25 @@ export const Settings = ({
                            navigation,
                            route,
                          }: SettingsProps) => {
-  const [clientName, setClientName] = useState<string>('');
-  const [initialClientName, setInitialClientName] = useState<string>('');
+  const [userName, setUserName] = useState<string>('');
+  const [initialUserName, setInitialUserName] = useState<string>('');
   const [isValid, setIsValid] = useState<boolean>(false);
   const [inputRef, setInputRef] = useState<TextInput>();
   const [userImage, setUserImage] = useState<string | null>();
 
   useEffect(() => {
-    clientStorage.getClientName().then(res => {
-      setClientName(res || '');
-      setInitialClientName(res || '');
-
-      checkValidity();
+    userStorage.currentUserDetails$.subscribe(res => {
+      setInitialUserName(res.name || '');
+      setUserImage(res.image);
     });
   }, []);
 
   useEffect(() => {
     checkValidity();
-  }, [clientName]);
+  }, [userName]);
 
   const checkValidity = () => {
-    setIsValid(Boolean(clientName?.length));
+    setIsValid(Boolean(userName?.length));
   };
 
   const openImageCrop = () => {
@@ -72,8 +70,8 @@ export const Settings = ({
           [
             {
               resize: {
-                width: 128,
-                height: 128,
+                width: 256,
+                height: 256,
               },
             },
           ],
@@ -82,7 +80,7 @@ export const Settings = ({
             base64: true,
           },
         ).then(resized => {
-          clientStorage.updateUserInfo({ image: resized.base64 }).then(() => {
+          userStorage.updateUserInfo({ image: resized.base64 }).then(() => {
             setUserImage(resized.base64);
           });
         });
@@ -91,11 +89,10 @@ export const Settings = ({
     });
   };
 
-  const saveClientsInfo = () => {
-    clientStorage.updateUserInfo({ name: clientName }).then(() => {
-      setInitialClientName(clientName);
-      setClientName(clientName);
-      clientStorage.setClientName(clientName);
+  const saveUserInfo = () => {
+    userStorage.updateUserInfo({ name: userName }).then(() => {
+      setInitialUserName(userName);
+      setUserName(userName);
       inputRef?.clear();
       checkValidity();
     });
@@ -103,15 +100,14 @@ export const Settings = ({
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity
-        onPress={openImageCrop}
-        style={styles.profileCard}
-      >
-        <ProfilePicture
-          size={0.15}
-          text={clientName?.substring(0, 1)}
-          image={userImage}
-        ></ProfilePicture>
+      <View style={styles.profileCard}>
+        <TouchableOpacity onPress={openImageCrop}>
+          <ProfilePicture
+            size={0.15}
+            text={userName?.substring(0, 1)}
+            image={userImage}
+          ></ProfilePicture>
+        </TouchableOpacity>
 
         <View style={styles.profileInfo}>
           <Text>Name</Text>
@@ -119,15 +115,15 @@ export const Settings = ({
             ref={input => { input && setInputRef(input); }}
             maxLength={25}
             style={styles.nameInput}
-            placeholder={initialClientName || ''}
-            onChangeText={setClientName}
+            placeholder={initialUserName || ''}
+            onChangeText={setUserName}
           ></TextInput>
         </View>
-      </TouchableOpacity>
+      </View>
 
       <View>
         <Button
-          onPress={saveClientsInfo}
+          onPress={saveUserInfo}
           disabled={!isValid}
         >SAVE</Button>
       </View>

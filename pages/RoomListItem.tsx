@@ -42,12 +42,12 @@ export function RoomListItem({
         </View>
         <View style={styles.listItemSubtitleContainer}>
           <View style={styles.listItemSubtitleItem}>
-            <Text>Owner: {room?.owner}</Text>
+            <Text>Owner: {room.owner.name}</Text>
           </View>
 
           <View style={styles.listItemSubtitleItem}>
             <Icon name={'person'}/>
-            <Text>{room.clientsCount}</Text>
+            <Text>{room.userCount}</Text>
           </View>
         </View>
       </ListItem.Content>

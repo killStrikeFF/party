@@ -7,12 +7,12 @@ import { Text } from '@rneui/themed';
 
 export interface ChatElemProps {
   chatNode: ChatNode;
-  currentClientUuid?: string;
+  currentUserUuid?: string;
 }
 
 export function ChatElem({
                            chatNode,
-                           currentClientUuid,
+                           currentUserUuid,
                          }: ChatElemProps) {
   return (
     <View style={styles.container}>
@@ -20,8 +20,8 @@ export function ChatElem({
         <Text
           style={{
             ...styles.elem,
-            marginLeft: currentClientUuid === chatNode?.senderUuid ? 'auto' : 0,
-            marginRight: currentClientUuid !== chatNode?.senderUuid && chatNode.senderUuid ? 'auto' : 0,
+            marginLeft: currentUserUuid === chatNode?.senderUuid ? 'auto' : 0,
+            marginRight: currentUserUuid !== chatNode?.senderUuid && chatNode.senderUuid ? 'auto' : 0,
           }}
         >{chatNode.message}</Text> :
 

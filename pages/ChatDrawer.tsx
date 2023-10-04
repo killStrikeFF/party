@@ -75,12 +75,12 @@ export const getNextState = (
 
 interface BottomDrawerProps {
   setIsShowContent: (isShow: boolean) => void;
-  currentClientUuid?: string,
+  currentUserUuid?: string,
 }
 
 export function ChatDrawer({
                              setIsShowContent,
-                             currentClientUuid,
+                             currentUserUuid,
                            }: BottomDrawerProps) {
   const { height } = Dimensions.get('window');
   const y = useRef(new Animated.Value(DrawerState.Closed)).current;
@@ -213,7 +213,7 @@ export function ChatDrawer({
           inverted={true}
           renderItem={(item) => <ChatElem
             chatNode={item.item}
-            currentClientUuid={currentClientUuid}
+            currentUserUuid={currentUserUuid}
           ></ChatElem>}
         ></FlatList>
       </View>

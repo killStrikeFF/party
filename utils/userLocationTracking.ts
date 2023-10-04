@@ -103,7 +103,7 @@ export class UserLocationTracking {
                 latitude: location.coords.latitude,
                 longitude: location.coords.longitude,
               };
-              this.socket.emit('updateClientCoordinates', clientCoordinatesForRoom);
+              this.socket.emit('updateUserCoordinates', clientCoordinatesForRoom);
             });
           }
         }
