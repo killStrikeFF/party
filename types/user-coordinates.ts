@@ -1,6 +1,6 @@
 import { Coordinates } from './coordinates';
 
-export interface ClientCoordinates {
+export interface UserCoordinates {
   coords: Coordinates;
   name: string;
 }

@@ -17,9 +17,10 @@ import {
 } from '../types/routes';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
-  clientStorage,
   socket,
+  userStorage,
 } from '../utils/shared.utils';
+import { UserDetailsAuthorizedResponse } from '../types/userDetails';
 
 interface InitUserProps {
   route: RouteProp<RootStackParamList, ROUTES.INIT_USER>;
@@ -32,32 +33,29 @@ export function InitUser({
                          }: InitUserProps) {
 
   const [clientName, changeClientName] = useState('');
-  const [socketId, setSocketId] = useState<string>('');
-  const [clientUuid, setClientUuid] = useState<string | null>('');
 
   const saveClientName = (): void => {
-    clientStorage.registry(clientName).then(() => auth());
+    userStorage.registry(clientName).then(() => auth());
   };
 
   const auth = (): void => {
-    clientStorage.getClientUuid().then(clientUuid => {
-      setClientUuid(clientUuid);
-
-      if (clientUuid) {
+    userStorage.getUserUuid().then(userUuid => {
+      if (userUuid) {
         socket.on('connect', () => {
-          setSocketId(socket.id);
-          setClientUuid(clientUuid);
+          console.log('connected');
         });
 
         socket.connect();
-        socket.emit('auth', { uuid: clientUuid });
+        socket.emit('auth', { uuid: userUuid });
       }
 
-      socket.on('isAuthorized', (isAuthed: { auth: boolean }) => {
-        if (isAuthed.auth) {
+      socket.on('isAuthorized', (userDetails: UserDetailsAuthorizedResponse) => {
+        if (userDetails.auth) {
           navigation.navigate(ROUTES.MAP, {
-            currentClientUuid: clientUuid as string,
+            currentUserUuid: userUuid as string,
           });
+
+          userStorage.updateCurrentUserDetails(userDetails);
         }
       });
     });

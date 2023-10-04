@@ -1,5 +1,5 @@
 import { RoomsDataService } from '../services/RoomsDataService';
-import { ClientStorage } from './client.utils';
+import { UserStorage } from './userStorage.utils';
 import { ChatDataService } from '../services/chat-data.service';
 import { UserLocationTracking } from './userLocationTracking';
 import { io } from 'socket.io-client';
@@ -10,6 +10,6 @@ export const socket = io(`ws://${BACKEND_API}`, {
 });
 
 export const roomDataService = new RoomsDataService(socket);
-export const clientStorage = new ClientStorage();
+export const userStorage = new UserStorage();
 export const chatDataService = new ChatDataService(socket);
 export const userLocationTracking = new UserLocationTracking(socket, roomDataService);

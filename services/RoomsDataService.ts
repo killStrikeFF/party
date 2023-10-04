@@ -3,20 +3,19 @@ import {
   take,
 } from 'rxjs';
 import {
-  ConnectToRoom,
   CreateRoom,
   RoomInfo,
 } from '../types/room';
 import axios from 'axios';
 import { BACKEND_API } from '../utils/backend';
-import { ClientCoordinates } from '../types/client-coordinates';
+import { UserCoordinates } from '../types/user-coordinates';
 import { Socket } from 'socket.io-client';
 
 export class RoomsDataService {
 
   public readonly rooms$ = new BehaviorSubject<RoomInfo[]>([]);
   public readonly connectedRoomId$ = new BehaviorSubject<string>('');
-  public readonly clientsCoordinatesRoom$ = new BehaviorSubject<ClientCoordinates[]>([]);
+  public readonly usersCoordinates$ = new BehaviorSubject<UserCoordinates[]>([]);
 
   constructor(private readonly socket: Socket) {
     this.socket.on('allParties', response => {
@@ -24,7 +23,7 @@ export class RoomsDataService {
     });
 
     this.updateAllRooms();
-    this.subscribeOnClientsCoordinatesOfRoom();
+    this.subscribeOnUserCoordinatesOfRoom();
   }
 
   public updateAllRooms(): void {
@@ -39,14 +38,14 @@ export class RoomsDataService {
 
   public joinRoom(
     roomUuid: string,
-    clientUuid: string,
+    userUuid: string,
   ): void {
-    const roomConnectData: ConnectToRoom = {
-      clientUuid,
-      roomUuid,
-    };
-
-    axios.post(`http://${BACKEND_API}/party/join`, roomConnectData).then(res => {
+    axios.post(`http://${BACKEND_API}/party/join`,
+      {
+        roomUuid,
+        userUuid,
+      },
+    ).then(res => {
       this.updateAllRooms();
       this.connectedRoomId$.next(res.data.uuid || '');
     });
@@ -59,13 +58,13 @@ export class RoomsDataService {
     });
   };
 
-  private subscribeOnClientsCoordinatesOfRoom(): void {
-    this.socket.on('clientsCoordinates', (res) => {
+  private subscribeOnUserCoordinatesOfRoom(): void {
+    this.socket.on('usersCoordinates', (res) => {
       this.connectedRoomId$.pipe(take(1)).subscribe(coonectedRoomId => {
         if (coonectedRoomId) {
-          this.clientsCoordinatesRoom$.next(res);
+          this.usersCoordinates$.next(res);
         } else {
-          this.clientsCoordinatesRoom$.next([]);
+          this.usersCoordinates$.next([]);
         }
       });
     });

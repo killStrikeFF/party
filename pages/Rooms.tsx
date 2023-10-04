@@ -43,7 +43,7 @@ export function Rooms({
                         navigation,
                         route,
                       }: RoomsProps) {
-  const { clientUuid } = route.params;
+  const { currentUserUuid } = route.params;
 
   const [allRooms, setAllRooms] = useState<RoomInfo[]>([]);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
@@ -87,7 +87,7 @@ export function Rooms({
   const createRoom = (): void => {
     const room: CreateRoom = {
       name: modalRoomName,
-      uuid: clientUuid,
+      uuid: currentUserUuid,
       coords: { ...selectedCoord } as Coordinates,
     };
 
@@ -95,11 +95,11 @@ export function Rooms({
   };
 
   const joinRoom = (roomUuid: string): void => {
-    roomDataService.joinRoom(roomUuid, clientUuid);
+    roomDataService.joinRoom(roomUuid, currentUserUuid);
   };
 
   const leaveRoom = (): void => {
-    roomDataService.leaveRoom(clientUuid);
+    roomDataService.leaveRoom(currentUserUuid);
   };
 
   return (

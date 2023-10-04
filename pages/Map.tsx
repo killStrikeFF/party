@@ -12,7 +12,7 @@ import React, {
   useEffect,
   useState,
 } from 'react';
-import { ClientCoordinates } from '../types/client-coordinates';
+import { UserCoordinates } from '../types/user-coordinates';
 import { UserRegion } from '../types/user-region';
 import {
   combineLatest,
@@ -33,9 +33,9 @@ import { RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
   chatDataService,
-  clientStorage,
   roomDataService,
   userLocationTracking,
+  userStorage,
 } from '../utils/shared.utils';
 
 interface MapProps {
@@ -48,16 +48,16 @@ export const Map = ({
                       route,
                     }: MapProps) => {
 
-  const [clients, setClients] = useState<ClientCoordinates[]>([]);
+  const [usersCoordinates, setUsersCoordinates] = useState<UserCoordinates[]>([]);
   const [initialRegion, setInitialRegion] = useState<UserRegion>();
   const [isShowInputMessage, setIsShowInputMessage] = useState(false);
   const [isShowChat, setIsShowChat] = useState(false);
-  const [currentClientUuid, setCurrentClientUuid] = useState<string>();
+  const [currentUserUuid, setCurrentUserUuid] = useState<string>();
 
   const openRoomList = () => {
     navigation.navigate(
       ROUTES.ROOMS,
-      { clientUuid: currentClientUuid as string },
+      { currentUserUuid: currentUserUuid as string },
     );
   };
 
@@ -71,17 +71,16 @@ export const Map = ({
   };
 
   const openSettings = () => {
-    navigation.navigate(ROUTES.SETTINGS, {})
-  }
-
+    navigation.navigate(ROUTES.SETTINGS, {});
+  };
 
   useEffect(() => {
     BackHandler.addEventListener('hardwareBackPress', hardwareBackPress);
 
     navigation.navigate(ROUTES.INIT_USER, {});
-    clientStorage.getClientUuid().then(clientUuid => {
-      if (clientUuid) {
-        setCurrentClientUuid(clientUuid);
+    userStorage.getUserUuid().then(userUuid => {
+      if (userUuid) {
+        setCurrentUserUuid(userUuid);
       }
     });
 
@@ -101,12 +100,15 @@ export const Map = ({
         chatDataService.setIsShownChat(Boolean(connectedRoomId));
         chatDataService.setIsClosedChat(Boolean(connectedRoomId));
         if (connectedRoomId) {
-          return roomDataService.clientsCoordinatesRoom$;
+          return roomDataService.usersCoordinates$;
         }
 
-        return of([]);
+        return of<UserCoordinates[]>([]);
       }),
-    ).subscribe(res => setClients(res));
+    ).subscribe(res => {
+      console.log(res);
+      setUsersCoordinates(res);
+    });
 
     userLocationTracking.initialRegion$.subscribe(region => setInitialRegion(region));
 
@@ -123,16 +125,16 @@ export const Map = ({
           initialRegion={initialRegion}
           provider={PROVIDER_GOOGLE}
         >
-          {clients.map((
-            client,
+          {usersCoordinates.map((
+            user,
             index,
           ) => (
             <Marker
-              key={client.name + index}
-              title={client.name}
+              key={user.name + index}
+              title={user.name}
               coordinate={{
-                latitude: client.coords.latitude,
-                longitude: client.coords.longitude,
+                latitude: user.coords.latitude,
+                longitude: user.coords.longitude,
               }}
             />
           ))}
@@ -142,7 +144,7 @@ export const Map = ({
       {isShowChat ?
         <ChatDrawer
           setIsShowContent={setIsShowInputMessage}
-          currentClientUuid={currentClientUuid}
+          currentUserUuid={currentUserUuid}
         ></ChatDrawer>
 
         : null}
