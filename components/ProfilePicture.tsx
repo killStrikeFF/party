@@ -10,7 +10,13 @@ export const ProfilePicture = ({
                                  size,
                                  text,
                                  image,
-                               }: { size: number, text?: string, image?: string | null }) => {
+                                 isShowBorderColor = false,
+                               }: {
+  size: number,
+  text?: string,
+  image?: string | null,
+  isShowBorderColor?: boolean
+}) => {
   const styles = StyleSheet.create({
     picturePlaceholder: {
       height: Dimensions.get('window').height * size,
@@ -19,6 +25,8 @@ export const ProfilePicture = ({
       alignItems: 'center',
       overflow: 'hidden',
       backgroundColor: '#c0f8b4',
+      borderColor: '#22bfd4',
+      borderWidth: isShowBorderColor ? 3 : 0,
     },
 
     picturePlaceholderText: {
@@ -32,6 +40,9 @@ export const ProfilePicture = ({
       height: Dimensions.get('window').height * size,
       width: Dimensions.get('window').height * size,
       borderRadius: Math.round((Dimensions.get('window').height + Dimensions.get('window').width) / 2),
+      resizeMode: 'cover',
+      borderColor: '#22bfd4',
+      borderWidth: isShowBorderColor ? 3 : 0,
     },
   });
 
