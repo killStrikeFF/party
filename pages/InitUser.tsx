@@ -51,9 +51,7 @@ export function InitUser({
 
       socket.on('isAuthorized', (userDetails: UserDetailsAuthorizedResponse) => {
         if (userDetails.auth) {
-          navigation.navigate(ROUTES.MAP, {
-            currentUserUuid: userUuid as string,
-          });
+          navigation.navigate(ROUTES.MAP, {});
 
           userStorage.updateCurrentUserDetails(userDetails);
         }

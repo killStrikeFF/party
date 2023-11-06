@@ -12,7 +12,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { DrawerState } from '../pages/ChatDrawer';
+import { DrawerState } from './ChatDrawer';
 import { chatDataService } from '../utils/shared.utils';
 
 export enum InputMessageDrawState {

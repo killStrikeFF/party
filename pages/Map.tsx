@@ -12,18 +12,18 @@ import React, {
   useEffect,
   useState,
 } from 'react';
-import { UserCoordinates } from '../types/user-coordinates';
 import { UserRegion } from '../types/user-region';
 import {
   combineLatest,
   of,
   switchMap,
 } from 'rxjs';
-import { ChatDrawer } from './ChatDrawer';
+import { ChatDrawer } from '../components/ChatDrawer';
 import { InputMessage } from '../components/InputMessage';
 import {
   Button,
   Icon,
+  Text,
 } from '@rneui/themed';
 import {
   RootStackParamList,
@@ -35,8 +35,11 @@ import {
   chatDataService,
   roomDataService,
   userLocationTracking,
+  usersData,
   userStorage,
 } from '../utils/shared.utils';
+import { UserMap } from '../types/user-map';
+import { MapMarker } from '../components/MapMarker';
 
 interface MapProps {
   route: RouteProp<RootStackParamList, ROUTES.MAP>;
@@ -44,30 +47,49 @@ interface MapProps {
 }
 
 export const Map = ({
-                      navigation,
                       route,
+                      navigation,
                     }: MapProps) => {
-
-  const [usersCoordinates, setUsersCoordinates] = useState<UserCoordinates[]>([]);
+  const [usersMap, setUsersMap] = useState<UserMap[]>([]);
   const [initialRegion, setInitialRegion] = useState<UserRegion>();
   const [isShowInputMessage, setIsShowInputMessage] = useState(false);
   const [isShowChat, setIsShowChat] = useState(false);
   const [currentUserUuid, setCurrentUserUuid] = useState<string>();
+  const [isCreatingRoomMode, setIsCreatingRoomMode] = useState(false);
 
-  const openRoomList = () => {
+  const openRoomList = (): void => {
     navigation.navigate(
       ROUTES.ROOMS,
       { currentUserUuid: currentUserUuid as string },
     );
   };
 
-  const hardwareBackPress = () => {
+  const openUsersPage = (): void => {
+    navigation.navigate(ROUTES.USERS, {});
+  };
+
+  const openUserPage = (user: UserMap): void => {
+    navigation.navigate(ROUTES.USER, { user });
+  };
+
+  const hardwareBackPress = (): boolean => {
     if (!chatDataService.isClosedChat$.getValue()) {
       chatDataService.setIsClosedChat(true);
       return true;
     }
 
     return false;
+  };
+
+  const startCreatingRoom = (): void => {
+    setIsCreatingRoomMode(true);
+  };
+
+  const openAddRoom = (event: any): void => {
+    navigation.navigate(ROUTES.ADD_ROOM, {
+      coords: event.nativeEvent.coordinate,
+      currentUserUuid: currentUserUuid as string,
+    });
   };
 
   const openSettings = () => {
@@ -98,17 +120,14 @@ export const Map = ({
     roomDataService.connectedRoomId$.pipe(
       switchMap(connectedRoomId => {
         chatDataService.setIsShownChat(Boolean(connectedRoomId));
-        chatDataService.setIsClosedChat(Boolean(connectedRoomId));
+        chatDataService.setIsClosedChat(!Boolean(connectedRoomId));
         if (connectedRoomId) {
-          return roomDataService.usersCoordinates$;
+          return usersData.users$;
         }
 
-        return of<UserCoordinates[]>([]);
+        return of<UserMap[]>([]);
       }),
-    ).subscribe(res => {
-      console.log(res);
-      setUsersCoordinates(res);
-    });
+    ).subscribe(res => setUsersMap(res));
 
     userLocationTracking.initialRegion$.subscribe(region => setInitialRegion(region));
 
@@ -117,6 +136,10 @@ export const Map = ({
     };
   }, [navigation]);
 
+  useEffect(() => {
+    setIsCreatingRoomMode(Boolean(route?.params?.isCreateRoomMode));
+  }, [route]);
+
   return (
     <View style={styles.container}>
       {initialRegion ?
@@ -124,24 +147,31 @@ export const Map = ({
           style={styles.map}
           initialRegion={initialRegion}
           provider={PROVIDER_GOOGLE}
+          onPress={isCreatingRoomMode ? openAddRoom : undefined}
         >
-          {usersCoordinates.map((
+          {usersMap.map((
             user,
             index,
           ) => (
-            <Marker
-              key={user.name + index}
-              title={user.name}
-              coordinate={{
-                latitude: user.coords.latitude,
-                longitude: user.coords.longitude,
-              }}
-            />
+            !isCreatingRoomMode ?
+              <Marker
+                key={user.name + index}
+                coordinate={{
+                  latitude: user.coords.latitude,
+                  longitude: user.coords.longitude,
+                }}
+                onPress={openUserPage.bind(this, user)}
+              >
+                <MapMarker user={user}></MapMarker>
+              </Marker>
+
+              : null
           ))}
         </MapView> :
-        <ActivityIndicator size={'large'}/>}
+        <ActivityIndicator size={'large'}/>
+      }
 
-      {isShowChat ?
+      {isShowChat && !isCreatingRoomMode ?
         <ChatDrawer
           setIsShowContent={setIsShowInputMessage}
           currentUserUuid={currentUserUuid}
@@ -149,41 +179,90 @@ export const Map = ({
 
         : null}
 
-      {isShowChat ? <InputMessage isShowInputMessage={isShowInputMessage}></InputMessage> : null}
+      {isShowChat && !isCreatingRoomMode ? <InputMessage isShowInputMessage={isShowInputMessage}></InputMessage> : null}
 
-      <View style={styles.actionsContainer}>
-        <Button
-          radius={'sm'}
-          type="outline"
-          buttonStyle={{
-            backgroundColor: 'white',
-            borderColor: 'black',
-            zIndex: 1,
-          }}
-          onPress={openSettings}
-        >
-          <Icon
-            name="settings"
-            color="black"
-          />
-        </Button>
+      {!isCreatingRoomMode ? <View style={styles.actionsContainer}>
+          <Button
+            radius={'sm'}
+            type="outline"
+            buttonStyle={{
+              backgroundColor: 'white',
+              borderColor: 'black',
+              zIndex: 1,
+            }}
+            onPress={openSettings}
+          >
+            <Icon
+              name="settings"
+              color="black"
+            />
+          </Button>
 
-        <Button
-          radius={'sm'}
-          type="outline"
-          buttonStyle={{
-            backgroundColor: 'white',
-            borderColor: 'black',
-            zIndex: 1,
-          }}
-          onPress={openRoomList}
-        >
-          <Icon
-            name="meeting-room"
-            color="black"
-          />
-        </Button>
-      </View>
+          {isShowChat ?
+            <Button
+              radius={'sm'}
+              type="outline"
+              buttonStyle={{
+                backgroundColor: 'white',
+                borderColor: 'black',
+                zIndex: 1,
+              }}
+              onPress={openUsersPage}
+            >
+              <Icon
+                name="group"
+                color="black"
+              />
+            </Button>
+            :
+            <Button
+              radius={'sm'}
+              type="outline"
+              buttonStyle={{
+                backgroundColor: 'white',
+                borderColor: 'black',
+                zIndex: 1,
+              }}
+              onPress={openRoomList}
+            >
+              <Icon
+                name="meeting-room"
+                color="black"
+              />
+            </Button>
+          }
+
+          <Button
+            radius={'sm'}
+            type="outline"
+            buttonStyle={{
+              backgroundColor: 'white',
+              borderColor: 'black',
+              zIndex: 1,
+              marginBottom: 0,
+            }}
+            onPress={startCreatingRoom}
+            containerStyle={{
+              alignSelf: 'flex-end',
+              marginTop: 'auto',
+            }}
+          >
+            <Icon
+              name="add"
+              color="black"
+            />
+          </Button>
+        </View>
+        : null}
+
+      {isCreatingRoomMode ?
+        <View style={styles.creatingRoomContainer}>
+          <View style={styles.creatingRoomInnerContainer}>
+            <Text>Выберите на карте координаты комнаты</Text>
+          </View>
+        </View>
+        : null}
+
     </View>
   );
 };
@@ -216,10 +295,27 @@ const styles = StyleSheet.create({
     borderTopColor: '#aeaeae',
   },
   actionsContainer: {
+    flex: 1,
+    height: '80%',
     position: 'absolute',
     top: '10%',
     right: '5%',
     zIndex: 0,
     gap: 12,
+  },
+
+  creatingRoomContainer: {
+    width: '100%',
+    position: 'absolute',
+    top: '5%',
+    opacity: 0.8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  creatingRoomInnerContainer: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 5,
+    padding: 15,
   },
 });

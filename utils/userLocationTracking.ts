@@ -2,13 +2,13 @@ import * as Location from 'expo-location';
 import { LocationObject } from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
 import { Socket } from 'socket.io-client';
-import { RoomsDataService } from '../services/RoomsDataService';
+import { RoomsDataService } from '../services/rooms-data.service';
 import {
   filter,
   ReplaySubject,
   take,
 } from 'rxjs';
-import { ClientCoordinatesForRoomDto } from '../types/room';
+import { UserCoordinatesForRoomDto } from '../types/room';
 import { UserRegion } from '../types/user-region';
 import { getUserRegion } from './userRegion';
 
@@ -89,7 +89,7 @@ export class UserLocationTracking {
                error,
              }) => {
         if (error) {
-          console.error(error);
+          console.error('Ошибка трекинга', error);
           return;
         }
 
@@ -99,11 +99,11 @@ export class UserLocationTracking {
 
           if (location && this.socket.id) {
             this.roomDataService.connectedRoomId$.pipe(take(1), filter(Boolean)).subscribe(roomUuid => {
-              const clientCoordinatesForRoom: ClientCoordinatesForRoomDto = {
+              const userCoordinatesForRoom: UserCoordinatesForRoomDto = {
                 latitude: location.coords.latitude,
                 longitude: location.coords.longitude,
               };
-              this.socket.emit('updateUserCoordinates', clientCoordinatesForRoom);
+              this.socket.emit('updateUserCoordinates', userCoordinatesForRoom);
             });
           }
         }

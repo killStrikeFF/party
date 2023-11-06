@@ -16,7 +16,7 @@ import {
   useState,
 } from 'react';
 import { ChatNode } from '../types/messages';
-import { ChatElem } from '../components/ChatElem';
+import { ChatElem } from './ChatElem';
 import { chatDataService } from '../utils/shared.utils';
 import { filter } from 'rxjs';
 

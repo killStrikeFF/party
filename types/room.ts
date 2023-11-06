@@ -25,4 +25,4 @@ export interface ConnectToRoom {
   userUuid: string;
 }
 
-export type ClientCoordinatesForRoomDto = Coordinates;
+export type UserCoordinatesForRoomDto = Coordinates;
