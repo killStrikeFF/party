@@ -17,19 +17,17 @@ export class RoomsDataService {
 
   public readonly rooms$ = new BehaviorSubject<RoomInfo[]>([]);
   public readonly connectedRoomId$ = new BehaviorSubject<string>('');
-  public readonly connectedRoomName$ = combineLatest([
+  public readonly currentRoomInfo$ = combineLatest([
     this.rooms$,
     this.connectedRoomId$,
   ]).pipe(
     map(([rooms, connectedRoomId]) => {
-      const room = rooms.find(room => room.uuid === connectedRoomId);
-
-      if (room) {
-        return room.name;
-      }
-
-      return null;
+      return rooms.find(room => room.uuid === connectedRoomId);
     }),
+    shareReplay(1),
+  );
+  public readonly connectedRoomName$ = this.currentRoomInfo$.pipe(
+    map(currentRoomInfo => currentRoomInfo?.name),
     distinctUntilChanged(),
     shareReplay(1),
   );

@@ -27,7 +27,15 @@ export function User({
                      }: UserProps) {
   const userData = route.params.user;
 
-  useEffect(() => {
+  const showUserOnMap = (): void => {
+    navigation.navigate(ROUTES.MAP, { mapCenter: userData.coords });
+  };
+
+  const whisperToUser = (): void => {
+    navigation.navigate(ROUTES.MAP, { whisperUserName: userData.name });
+  };
+
+  useEffect((): void => {
     navigation.setOptions({ title: userData.name });
   }, []);
 
@@ -54,6 +62,7 @@ export function User({
             backgroundColor: 'white',
             borderColor: 'black',
           }}
+          onPress={showUserOnMap}
         >
           <Icon
             name="near-me"
@@ -82,6 +91,7 @@ export function User({
             backgroundColor: 'white',
             borderColor: 'black',
           }}
+          onPress={whisperToUser}
         >
           <Icon
             name="mail"

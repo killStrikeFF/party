@@ -27,6 +27,14 @@ export function UserListItem({
     navigation.navigate(ROUTES.USER, { user });
   };
 
+  const showUserOnMap = () => {
+    navigation.navigate(ROUTES.MAP, { mapCenter: user.coords });
+  };
+
+  const whisperToUser = (): void => {
+    navigation.navigate(ROUTES.MAP, { whisperUserName: user.name });
+  };
+
   return (
     <ListItem
       bottomDivider
@@ -58,6 +66,7 @@ export function UserListItem({
                   backgroundColor: 'white',
                   borderColor: 'black',
                 }}
+                onPress={showUserOnMap}
               >
                 <Icon
                   name="near-me"
@@ -88,6 +97,7 @@ export function UserListItem({
                   backgroundColor: 'white',
                   borderColor: 'black',
                 }}
+                onPress={whisperToUser}
               >
                 <Icon
                   name="mail"

@@ -10,6 +10,7 @@ import MapView, {
 } from 'react-native-maps';
 import React, {
   useEffect,
+  useRef,
   useState,
 } from 'react';
 import { UserRegion } from '../types/user-region';
@@ -40,6 +41,8 @@ import {
 } from '../utils/shared.utils';
 import { UserMap } from '../types/user-map';
 import { MapMarker } from '../components/MapMarker';
+import { RoomInfo } from '../types/room';
+import { regionFrom } from '../utils/calculateRegion';
 
 interface MapProps {
   route: RouteProp<RootStackParamList, ROUTES.MAP>;
@@ -51,16 +54,22 @@ export const Map = ({
                       navigation,
                     }: MapProps) => {
   const [usersMap, setUsersMap] = useState<UserMap[]>([]);
+  const [roomsMap, setRoomsMap] = useState<RoomInfo[]>([]);
+  const [currentRoomInfo, setCurrentRoomInfo] = useState<RoomInfo>();
+  const mapRef = useRef<MapView>(null);
+
   const [initialRegion, setInitialRegion] = useState<UserRegion>();
   const [isShowInputMessage, setIsShowInputMessage] = useState(false);
   const [isShowChat, setIsShowChat] = useState(false);
-  const [currentUserUuid, setCurrentUserUuid] = useState<string>();
+  const [currentUserUuid, setCurrentUserUuid] = useState<string>('');
   const [isCreatingRoomMode, setIsCreatingRoomMode] = useState(false);
+  const [whisperUserName, setWhisperUserName] = useState('');
+  const [isOpenChat, setIsOpenChat] = useState(false);
 
   const openRoomList = (): void => {
     navigation.navigate(
       ROUTES.ROOMS,
-      { currentUserUuid: currentUserUuid as string },
+      { currentUserUuid },
     );
   };
 
@@ -88,7 +97,7 @@ export const Map = ({
   const openAddRoom = (event: any): void => {
     navigation.navigate(ROUTES.ADD_ROOM, {
       coords: event.nativeEvent.coordinate,
-      currentUserUuid: currentUserUuid as string,
+      currentUserUuid,
     });
   };
 
@@ -117,6 +126,18 @@ export const Map = ({
       setIsShowChat(false);
     });
 
+    combineLatest([
+      roomDataService.currentRoomInfo$,
+      roomDataService.rooms$,
+    ]).subscribe(([currentRoomInfo, rooms]) => {
+      setCurrentRoomInfo(currentRoomInfo);
+      if (currentRoomInfo) {
+        setRoomsMap([]);
+      } else {
+        setRoomsMap(rooms);
+      }
+    });
+
     roomDataService.connectedRoomId$.pipe(
       switchMap(connectedRoomId => {
         chatDataService.setIsShownChat(Boolean(connectedRoomId));
@@ -138,12 +159,31 @@ export const Map = ({
 
   useEffect(() => {
     setIsCreatingRoomMode(Boolean(route?.params?.isCreateRoomMode));
+
+    if (route?.params?.mapCenter) {
+      mapRef?.current?.animateToRegion(
+        regionFrom(route.params.mapCenter.latitude, route.params.mapCenter.longitude, 500),
+        1000,
+      );
+    }
+
+    if (route.params?.whisperUserName) {
+      setIsOpenChat(true);
+      setIsShowInputMessage(true);
+      setWhisperUserName(route?.params?.whisperUserName);
+      setTimeout(() => {
+        setWhisperUserName('');
+        setIsOpenChat(false);
+      }, 1000);
+    }
+
   }, [route]);
 
   return (
     <View style={styles.container}>
       {initialRegion ?
         <MapView
+          ref={mapRef}
           style={styles.map}
           initialRegion={initialRegion}
           provider={PROVIDER_GOOGLE}
@@ -167,6 +207,29 @@ export const Map = ({
 
               : null
           ))}
+
+          {!isCreatingRoomMode ?
+            currentRoomInfo ?
+              <Marker
+                coordinate={currentRoomInfo.coords}
+                title={currentRoomInfo.name}
+              ></Marker>
+
+              : roomsMap.map((
+                room,
+                index,
+              ) => (
+                <Marker
+                  coordinate={room.coords}
+                  key={room.name + index}
+                  title={room.name}
+                >
+
+                </Marker>
+              ))
+            : null
+          }
+
         </MapView> :
         <ActivityIndicator size={'large'}/>
       }
@@ -175,11 +238,17 @@ export const Map = ({
         <ChatDrawer
           setIsShowContent={setIsShowInputMessage}
           currentUserUuid={currentUserUuid}
+          isOpenChat={isOpenChat}
         ></ChatDrawer>
 
         : null}
 
-      {isShowChat && !isCreatingRoomMode ? <InputMessage isShowInputMessage={isShowInputMessage}></InputMessage> : null}
+      {isShowChat && !isCreatingRoomMode ?
+        <InputMessage
+          isShowInputMessage={isShowInputMessage}
+          whisperUserName={whisperUserName}
+        ></InputMessage> :
+        null}
 
       {!isCreatingRoomMode ? <View style={styles.actionsContainer}>
           <Button
