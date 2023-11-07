@@ -12,7 +12,7 @@ export enum ROUTES {
 }
 
 export type RootStackParamList = {
-  [ROUTES.MAP]: { isCreateRoomMode?: boolean };
+  [ROUTES.MAP]: { isCreateRoomMode?: boolean, mapCenter?: Coordinates, whisperUserName?: string };
   [ROUTES.ROOMS]: { currentUserUuid: string };
   [ROUTES.INIT_USER]: {};
   [ROUTES.SETTINGS]: {};

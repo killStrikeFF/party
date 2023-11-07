@@ -39,9 +39,13 @@ export const getNextStateInputMessage = (currentState: InputMessageDrawState): I
   return InputMessageDrawState.Open;
 };
 
-export function InputMessage({ isShowInputMessage }: { isShowInputMessage: boolean }) {
+export function InputMessage({
+                               isShowInputMessage,
+                               whisperUserName,
+                             }: { isShowInputMessage: boolean, whisperUserName?: string }) {
   const [message, setMessage] = useState('');
   const y = useRef(new Animated.Value(DrawerState.Closed)).current;
+  const messageInputRef = useRef(null);
 
   const sendMessage = (): void => {
     if (message.trim().length) {
@@ -49,6 +53,13 @@ export function InputMessage({ isShowInputMessage }: { isShowInputMessage: boole
       setMessage('');
     }
   };
+
+  useEffect(() => {
+    if (whisperUserName) {
+      setMessage(whisperUserName + ', ');
+      setTimeout(() => messageInputRef.current?.focus(), 100);
+    }
+  }, [whisperUserName]);
 
   useEffect(() => {
     const nextState = getNextStateInputMessage(isShowInputMessage ?
@@ -66,6 +77,7 @@ export function InputMessage({ isShowInputMessage }: { isShowInputMessage: boole
     >
       <View style={{ width: '100%' }}>
         <Input
+          ref={messageInputRef}
           onChangeText={setMessage}
           placeholder={'Сообщение'}
           errorStyle={{ display: 'none' }}

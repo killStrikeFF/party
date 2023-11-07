@@ -29,7 +29,7 @@ export function MapMarker({
       borderRadius: size * 0.25,
 
       position: 'absolute',
-      top: size * 0.4,
+      top: size * 0.37,
       left: size * 0.25,
       transform: [{ translateY: -(size * 0.25) }],
 

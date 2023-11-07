@@ -76,11 +76,13 @@ export const getNextState = (
 interface BottomDrawerProps {
   setIsShowContent: (isShow: boolean) => void;
   currentUserUuid?: string,
+  isOpenChat?: boolean,
 }
 
 export function ChatDrawer({
                              setIsShowContent,
                              currentUserUuid,
+                             isOpenChat,
                            }: BottomDrawerProps) {
   const { height } = Dimensions.get('window');
   const y = useRef(new Animated.Value(DrawerState.Closed)).current;
@@ -157,6 +159,13 @@ export function ChatDrawer({
       keyboardDidShowSubscription.remove();
     };
   }, []);
+
+  useEffect(() => {
+    if (isOpenChat) {
+      animateMove(y, DrawerState.Open);
+      setNumberState(DrawerState.Open);
+    }
+  }, [isOpenChat]);
 
   const change = () => {
     chatDataService.isClosedChat$.pipe(
