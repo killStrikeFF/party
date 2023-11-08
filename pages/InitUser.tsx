@@ -41,25 +41,25 @@ export function InitUser({
   const auth = (): void => {
     userStorage.getUserUuid().then(userUuid => {
       if (userUuid) {
-        socket.on('connect', () => {
-          console.log('connected');
-        });
-
-        socket.connect();
         socket.emit('auth', { uuid: userUuid });
       }
-
-      socket.on('isAuthorized', (userDetails: UserDetailsAuthorizedResponse) => {
-        if (userDetails.auth) {
-          navigation.navigate(ROUTES.MAP, {});
-
-          userStorage.updateCurrentUserDetails(userDetails);
-        }
-      });
     });
   };
 
   useEffect(() => {
+    socket.on('connect', () => {
+      console.log('connected');
+    });
+
+    socket.connect();
+    socket.on('isAuthorized', (userDetails: UserDetailsAuthorizedResponse) => {
+      if (userDetails.auth) {
+        navigation.navigate(ROUTES.MAP, {});
+
+        userStorage.updateCurrentUserDetails(userDetails);
+      }
+    });
+
     auth();
   }, []);
 
@@ -68,11 +68,11 @@ export function InitUser({
       <Input
         onChangeText={changeClientName}
         value={clientName}
-        placeholder={'Write your name'}
+        placeholder={'Введите ваше имя'}
       />
 
       <Button
-        title="Registry"
+        title="Зарегестрироваться"
         onPress={() => saveClientName()}
         disabled={!clientName}
       />

@@ -77,7 +77,7 @@ export class UserLocationTracking {
         notificationBody: 'Location tracking in background from Party',
         notificationColor: '#fff',
       },
-      timeInterval: 1000,
+      timeInterval: 100,
     });
   };
 

@@ -14,27 +14,26 @@ export class UserStorage {
     this.currentUserDetails$.next(userDetails);
   }
 
-  public registry(name: string): Promise<void> {
-    return axios.post(`http://${BACKEND_API}/registry`, { name })
-      .then(response => this.setUserUuid(response.data.uuid));
+  public async registry(name: string): Promise<void> {
+    const response = await axios.post(`http://${BACKEND_API}/registry`, { name });
+    return await this.setUserUuid(response.data.uuid);
   }
 
-  public updateUserInfo({
-                          name,
-                          image,
-                          color,
-                        }: { name?: string, image?: string, color?: string }): Promise<{ data: UserDetails }> {
-    return this.getUserUuid().then(uuid => {
-      return axios.patch(
-        `http://${BACKEND_API}/user-info`,
-        {
-          name,
-          image,
-          uuid,
-          color,
-        },
-      );
-    });
+  public async updateUserInfo({
+                                name,
+                                image,
+                                color,
+                              }: { name?: string, image?: string, color?: string }): Promise<{ data: UserDetails }> {
+    const uuid = await this.getUserUuid();
+    return await axios.patch(
+      `http://${BACKEND_API}/user-info`,
+      {
+        name,
+        image,
+        uuid,
+        color,
+      },
+    );
   }
 
   public setUserUuid(uuid: string): Promise<void> {

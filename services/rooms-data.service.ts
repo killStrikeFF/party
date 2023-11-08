@@ -12,6 +12,7 @@ import {
 import axios from 'axios';
 import { BACKEND_API } from '../utils/backend';
 import { Socket } from 'socket.io-client';
+import { UserStorage } from '../utils/userStorage.utils';
 
 export class RoomsDataService {
 
@@ -32,7 +33,10 @@ export class RoomsDataService {
     shareReplay(1),
   );
 
-  constructor(private readonly socket: Socket) {
+  constructor(
+    private readonly socket: Socket,
+    private readonly userStorage: UserStorage,
+  ) {
     this.socket.on('allParties', response => {
       this.rooms$.next(response.parties);
     });
@@ -63,7 +67,8 @@ export class RoomsDataService {
   };
 
   public async leaveRoom(): Promise<void> {
-    await axios.post(`http://${BACKEND_API}/party/leave`, { uuid: this.connectedRoomId$.getValue() });
+    const userId = await this.userStorage.getUserUuid();
+    await axios.post(`http://${BACKEND_API}/party/leave`, { uuid: userId });
     this.updateAllRooms();
     this.connectedRoomId$.next('');
   };

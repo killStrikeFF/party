@@ -10,8 +10,8 @@ export const socket = io(`ws://${BACKEND_API}`, {
   autoConnect: false,
 });
 
-export const roomDataService = new RoomsDataService(socket);
 export const userStorage = new UserStorage();
+export const roomDataService = new RoomsDataService(socket, userStorage);
 export const chatDataService = new ChatDataService(socket);
 export const userLocationTracking = new UserLocationTracking(socket, roomDataService);
 export const usersData = new UsersDataService(socket, roomDataService);

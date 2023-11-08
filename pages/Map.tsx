@@ -109,9 +109,9 @@ export const Map = ({
     BackHandler.addEventListener('hardwareBackPress', hardwareBackPress);
 
     navigation.navigate(ROUTES.INIT_USER, {});
-    userStorage.getUserUuid().then(userUuid => {
-      if (userUuid) {
-        setCurrentUserUuid(userUuid);
+    userStorage.currentUserDetails$.subscribe(userDetails => {
+      if (userDetails.uuid) {
+        setCurrentUserUuid(userDetails.uuid);
       }
     });
 

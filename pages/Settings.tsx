@@ -1,30 +1,30 @@
 import {
-    Dimensions,
-    StyleSheet,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Dimensions,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { RouteProp } from '@react-navigation/native';
 import {
-    RootStackParamList,
-    ROUTES,
+  RootStackParamList,
+  ROUTES,
 } from '../types/routes';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ProfilePicture } from '../components/ProfilePicture';
 import {
-    useEffect,
-    useState,
+  useEffect,
+  useState,
 } from 'react';
 import { userStorage } from '../utils/shared.utils';
 import {
-    Button,
-    Text,
+  Button,
+  Text,
 } from '@rneui/themed';
 import * as ImagePicker from 'expo-image-picker';
 import {
-    manipulateAsync,
-    SaveFormat,
+  manipulateAsync,
+  SaveFormat,
 } from 'expo-image-manipulator';
 import { PRE_DEFINED_COLORS } from '../utils/constants';
 
@@ -151,7 +151,10 @@ export const Settings = ({
 
         <View style={styles.profileCardRow}>
           {borderColors.map(color => (
-            <TouchableOpacity onPress={() => setNewUserColor(color)}>
+            <TouchableOpacity
+              onPress={() => setNewUserColor(color)}
+              key={color}
+            >
               <ColorBadge
                 color={color}
                 selected={color === newUserColor}
