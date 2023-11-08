@@ -43,7 +43,7 @@ export function MapMarker({
     <View style={styles.markerContainer}>
       <Icon
         name="location-on"
-        color="#22bfd4"
+        color={user?.color || '#22bfd4'}
         size={size}
       />
 

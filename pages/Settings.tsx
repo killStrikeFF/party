@@ -1,30 +1,32 @@
 import {
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Dimensions,
+    StyleSheet,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import { RouteProp } from '@react-navigation/native';
 import {
-  RootStackParamList,
-  ROUTES,
+    RootStackParamList,
+    ROUTES,
 } from '../types/routes';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ProfilePicture } from '../components/ProfilePicture';
 import {
-  useEffect,
-  useState,
+    useEffect,
+    useState,
 } from 'react';
 import { userStorage } from '../utils/shared.utils';
 import {
-  Button,
-  Text,
+    Button,
+    Text,
 } from '@rneui/themed';
 import * as ImagePicker from 'expo-image-picker';
 import {
-  manipulateAsync,
-  SaveFormat,
+    manipulateAsync,
+    SaveFormat,
 } from 'expo-image-manipulator';
+import { PRE_DEFINED_COLORS } from '../utils/constants';
 
 interface SettingsProps {
   route: RouteProp<RootStackParamList, ROUTES.SETTINGS>;
@@ -35,26 +37,27 @@ export const Settings = ({
                            navigation,
                            route,
                          }: SettingsProps) => {
-  const [userName, setUserName] = useState<string>('');
   const [initialUserName, setInitialUserName] = useState<string>('');
-  const [isValid, setIsValid] = useState<boolean>(false);
+  const [newUserName, setNewUserName] = useState<string>('');
   const [inputRef, setInputRef] = useState<TextInput>();
-  const [userImage, setUserImage] = useState<string | null>();
+  const [userImage, setUserImage] = useState<string>();
+  const [newUserImage, setNewUserImage] = useState<string>();
+  const [isValid, setIsValid] = useState<boolean>(false);
+  const [userColor, setUserColor] = useState<string>();
+  const [newUserColor, setNewUserColor] = useState<string>();
+  const borderColors = PRE_DEFINED_COLORS;
 
   useEffect(() => {
     userStorage.currentUserDetails$.subscribe(res => {
-      setInitialUserName(res.name || '');
+      setInitialUserName(res.name);
       setUserImage(res.image);
+      setUserColor(res.color);
     });
   }, []);
 
   useEffect(() => {
-    checkValidity();
-  }, [userName]);
-
-  const checkValidity = () => {
-    setIsValid(Boolean(userName?.length));
-  };
+    setIsValid(Boolean(newUserName || newUserImage || newUserColor));
+  }, [newUserName, newUserImage, newUserColor]);
 
   const openImageCrop = () => {
     ImagePicker.launchImageLibraryAsync({
@@ -80,9 +83,7 @@ export const Settings = ({
             base64: true,
           },
         ).then(resized => {
-          userStorage.updateUserInfo({ image: resized.base64 }).then(() => {
-            setUserImage(resized.base64);
-          });
+          setNewUserImage(resized.base64);
         });
 
       }
@@ -90,45 +91,86 @@ export const Settings = ({
   };
 
   const saveUserInfo = () => {
-    userStorage.updateUserInfo({ name: userName }).then(() => {
-      setInitialUserName(userName);
-      setUserName(userName);
+    userStorage.updateUserInfo({
+      name: newUserName,
+      image: newUserImage,
+      color: newUserColor,
+    }).then((res) => {
+      userStorage.updateCurrentUserDetails(res.data);
       inputRef?.clear();
-      checkValidity();
+      setNewUserName('');
+      setNewUserColor('');
+      setNewUserImage('');
     });
+  };
+
+  const ColorBadge = ({
+                        color,
+                        selected,
+                      }: { color: string, selected: boolean }) => {
+    const styles = StyleSheet.create({
+      circle: {
+        backgroundColor: color,
+        borderColor: '#333',
+        borderWidth: selected ? 2 : 0,
+        height: Dimensions.get('window').height * 0.04,
+        width: Dimensions.get('window').height * 0.04,
+        borderRadius: Math.round((Dimensions.get('window').height + Dimensions.get('window').width) / 2),
+      },
+    });
+
+    return <View style={styles.circle}></View>;
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.profileCard}>
-        <TouchableOpacity onPress={openImageCrop}>
-          <ProfilePicture
-            size={0.15}
-            text={userName?.substring(0, 1)}
-            image={userImage}
-          ></ProfilePicture>
-        </TouchableOpacity>
+        <View style={styles.profileCardRow}>
+          <TouchableOpacity onPress={openImageCrop}>
+            <ProfilePicture
+              borderColor={newUserColor || userColor}
+              size={0.15}
+              text={newUserName || initialUserName}
+              image={newUserImage || userImage}
+            ></ProfilePicture>
+          </TouchableOpacity>
 
-        <View style={styles.profileInfo}>
-          <Text>Name</Text>
-          <TextInput
-            ref={input => { input && setInputRef(input); }}
-            maxLength={25}
-            style={styles.nameInput}
-            placeholder={initialUserName || ''}
-            onChangeText={setUserName}
-          ></TextInput>
+          <View style={styles.profileInfo}>
+            <Text>Name</Text>
+            <TextInput
+              ref={input => {
+                input && setInputRef(input);
+              }}
+              maxLength={25}
+              style={styles.nameInput}
+              placeholder={initialUserName || ''}
+              onChangeText={setNewUserName}
+            ></TextInput>
+          </View>
+        </View>
+
+        <View style={styles.profileCardRow}>
+          {borderColors.map(color => (
+            <TouchableOpacity onPress={() => setNewUserColor(color)}>
+              <ColorBadge
+                color={color}
+                selected={color === newUserColor}
+                key={color}
+              />
+            </TouchableOpacity>
+          ))}
         </View>
       </View>
 
       <View>
         <Button
-          onPress={saveUserInfo}
           disabled={!isValid}
+          onPress={saveUserInfo}
         >SAVE</Button>
       </View>
     </View>
   );
+
 };
 
 const styles = StyleSheet.create({
@@ -141,10 +183,17 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     backgroundColor: '#FFFFFF',
     padding: 20,
+    flexDirection: 'column',
+    marginBottom: 20,
+    gap: 24,
+    position: 'relative',
+  },
+
+  profileCardRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
-    position: 'relative',
+    justifyContent: 'space-evenly',
+    gap: 12,
   },
 
   profileInfo: {

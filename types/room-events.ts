@@ -6,6 +6,7 @@ export interface RoomUserEventData {
   uuid: string;
   name: string;
   image?: string;
+  color?: string;
 }
 
 export interface RoomEvent<T> {

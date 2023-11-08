@@ -22,7 +22,8 @@ export class UserStorage {
   public updateUserInfo({
                           name,
                           image,
-                        }: { name?: string, image?: string }): Promise<void> {
+                          color,
+                        }: { name?: string, image?: string, color?: string }): Promise<{ data: UserDetails }> {
     return this.getUserUuid().then(uuid => {
       return axios.patch(
         `http://${BACKEND_API}/user-info`,
@@ -30,6 +31,7 @@ export class UserStorage {
           name,
           image,
           uuid,
+          color,
         },
       );
     });

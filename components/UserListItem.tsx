@@ -1,20 +1,20 @@
 import { UserMap } from '../types/user-map';
 import {
-  StyleSheet,
-  TouchableOpacity,
-  View,
+    StyleSheet,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
-  RootStackParamList,
-  ROUTES,
+    RootStackParamList,
+    ROUTES,
 } from '../types/routes';
 import { ProfilePicture } from './ProfilePicture';
 import {
-  Button,
-  Icon,
-  ListItem,
-  Text,
+    Button,
+    Icon,
+    ListItem,
+    Text,
 } from '@rneui/themed';
 import React from 'react';
 
@@ -52,7 +52,7 @@ export function UserListItem({
             size={0.1}
             text={user.name}
             image={user.image}
-            isShowBorderColor={true}
+            borderColor={user.color}
           ></ProfilePicture>
 
           <View style={styles.userInfoContainer}>

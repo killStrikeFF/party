@@ -1,8 +1,8 @@
 import {
-  Dimensions,
-  StyleSheet,
-  Text,
-  View,
+    Dimensions,
+    StyleSheet,
+    Text,
+    View,
 } from 'react-native';
 import { Image } from '@rneui/themed';
 
@@ -10,12 +10,12 @@ export const ProfilePicture = ({
                                  size,
                                  text,
                                  image,
-                                 isShowBorderColor = false,
+                                 borderColor,
                                }: {
   size: number,
   text?: string,
   image?: string | null,
-  isShowBorderColor?: boolean
+  borderColor?: string
 }) => {
   const styles = StyleSheet.create({
     picturePlaceholder: {
@@ -25,8 +25,8 @@ export const ProfilePicture = ({
       alignItems: 'center',
       overflow: 'hidden',
       backgroundColor: '#c0f8b4',
-      borderColor: '#22bfd4',
-      borderWidth: isShowBorderColor ? 3 : 0,
+      borderColor: borderColor || '#c0f8b4',
+      borderWidth: borderColor ? 3 : 0,
     },
 
     picturePlaceholderText: {
@@ -41,8 +41,8 @@ export const ProfilePicture = ({
       width: Dimensions.get('window').height * size,
       borderRadius: Math.round((Dimensions.get('window').height + Dimensions.get('window').width) / 2),
       resizeMode: 'cover',
-      borderColor: '#22bfd4',
-      borderWidth: isShowBorderColor ? 3 : 0,
+      borderColor: borderColor || '#c0f8b4',
+      borderWidth: borderColor ? 3 : 0,
     },
   });
 
@@ -56,7 +56,7 @@ export const ProfilePicture = ({
         <View style={styles.picturePlaceholder}>
           <Text
             style={styles.picturePlaceholderText}
-          >{text}</Text>
+          >{text && text.substring(0, 1)}</Text>
         </View>}
     </View>
   );

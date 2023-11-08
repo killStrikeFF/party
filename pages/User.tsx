@@ -1,19 +1,19 @@
 import { RouteProp } from '@react-navigation/native';
 import {
-  RootStackParamList,
-  ROUTES,
+    RootStackParamList,
+    ROUTES,
 } from '../types/routes';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
-  StyleSheet,
-  View,
+    StyleSheet,
+    View,
 } from 'react-native';
 import React, { useEffect } from 'react';
 import { ProfilePicture } from '../components/ProfilePicture';
 import {
-  Button,
-  Icon,
-  Text,
+    Button,
+    Icon,
+    Text,
 } from '@rneui/themed';
 
 interface UserProps {
@@ -46,7 +46,7 @@ export function User({
           size={0.3}
           image={userData.image}
           text={userData.name}
-          isShowBorderColor={true}
+          borderColor={userData.color}
         ></ProfilePicture>
       </View>
 

@@ -9,4 +9,5 @@ export interface UserDetails {
   uuid: string;
   name: string;
   image: string;
+  color: string;
 }
