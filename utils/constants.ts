@@ -1,0 +1,1 @@
+export const PRE_DEFINED_COLORS = ['#A06400', '#BEBEBE', '#FFC800', '#FF3232', '#32FF32', '#64FFFF']
