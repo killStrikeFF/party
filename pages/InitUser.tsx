@@ -17,6 +17,7 @@ import {
 } from '../types/routes';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
+  roomDataService,
   socket,
   userStorage,
 } from '../utils/shared.utils';
@@ -54,8 +55,11 @@ export function InitUser({
     socket.connect();
     socket.on('isAuthorized', (userDetails: UserDetailsAuthorizedResponse) => {
       if (userDetails.auth) {
-        navigation.navigate(ROUTES.MAP, {});
 
+        if (userDetails.currentRoom) {
+          roomDataService.joinRoom(userDetails.currentRoom.uuid, userDetails.uuid).then();
+        }
+        navigation.navigate(ROUTES.MAP, {});
         userStorage.updateCurrentUserDetails(userDetails);
       }
     });
