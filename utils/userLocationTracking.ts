@@ -26,12 +26,18 @@ export class UserLocationTracking {
   ) {
     const requestPermissions = async () => {
       const foreground = await Location.requestForegroundPermissionsAsync();
-      if (foreground.granted) await Location.requestBackgroundPermissionsAsync();
+      if (foreground.granted) {
+        await Location.requestBackgroundPermissionsAsync();
+
+        const intervalId = setInterval(async () => {
+          const userRegion = await getUserRegion();
+          this.initialRegion$.next(userRegion);
+          clearInterval(intervalId);
+        }, 1000);
+      }
     };
 
-    requestPermissions().then(() => getUserRegion()).then((userRegion) => {
-      this.initialRegion$.next(userRegion);
-    });
+    requestPermissions();
 
     this.roomDataService.connectedRoomId$.subscribe(roomId => {
       if (roomId) {

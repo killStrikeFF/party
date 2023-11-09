@@ -5,10 +5,21 @@ export interface Room {
   coords: Coordinates;
 }
 
+export interface EditRoomBody {
+  uuid: string;
+  name?: string;
+  currentCoords?: Coordinates;
+  icon?: string;
+  description?: string;
+}
+
 export interface RoomInfo extends Room {
   uuid: string;
   userCount: number;
   owner: OwnerRoom;
+  currentCoords?: Coordinates;
+  icon?: string;
+  description?: string;
 }
 
 export interface OwnerRoom {
@@ -18,11 +29,6 @@ export interface OwnerRoom {
 
 export interface CreateRoom extends Room {
   uuid: string;
-}
-
-export interface ConnectToRoom {
-  roomUuid: string;
-  userUuid: string;
 }
 
 export type UserCoordinatesForRoomDto = Coordinates;

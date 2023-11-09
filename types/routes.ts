@@ -1,22 +1,27 @@
 import { UserMap } from './user-map';
 import { Coordinates } from './coordinates';
+import { RoomInfo } from './room';
 
 export enum ROUTES {
   MAP = 'Map',
   ROOMS = 'Rooms',
   SETTINGS = 'Settings',
-  INIT_USER = 'InitUser',
   USERS = 'Users',
   USER = 'User',
-  ADD_ROOM = 'AddRoom',
+  ROOM_PAGE = 'RoomPage',
 }
 
 export type RootStackParamList = {
   [ROUTES.MAP]: { isCreateRoomMode?: boolean, mapCenter?: Coordinates, whisperUserName?: string };
   [ROUTES.ROOMS]: { currentUserUuid: string };
-  [ROUTES.INIT_USER]: {};
   [ROUTES.SETTINGS]: {};
   [ROUTES.USERS]: {};
   [ROUTES.USER]: { user: UserMap };
-  [ROUTES.ADD_ROOM]: { coords: Coordinates, currentUserUuid: string };
+  [ROUTES.ROOM_PAGE]: {
+    coords?: Coordinates,
+    currentUserUuid: string,
+    isEditRoom?: boolean;
+    roomInfo?: RoomInfo,
+    isViewMode?: boolean,
+  };
 };

@@ -7,6 +7,7 @@ import {
 } from 'rxjs';
 import {
   CreateRoom,
+  EditRoomBody,
   RoomInfo,
 } from '../types/room';
 import axios from 'axios';
@@ -72,4 +73,9 @@ export class RoomsDataService {
     this.updateAllRooms();
     this.connectedRoomId$.next('');
   };
+
+  public async editRoom(roomBody: EditRoomBody): Promise<void> {
+    await axios.put(`http://${BACKEND_API}/party`);
+    this.updateAllRooms();
+  }
 }

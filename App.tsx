@@ -13,67 +13,78 @@ import {
 } from './types/routes';
 import { Rooms } from './pages/Rooms';
 import { InitUser } from './pages/InitUser';
-import { useEffect } from 'react';
+import {
+  useEffect,
+  useState,
+} from 'react';
 import { socket } from './utils/shared.utils';
 import { Settings } from './pages/Settings';
 import { Users } from './pages/Users';
 import { User } from './pages/User';
-import { AddRoom } from './pages/AddRoom';
+import { RoomPage } from './pages/RoomPage';
 
 export default function App() {
   const Stack = createNativeStackNavigator<RootStackParamList>();
+  const [isLoadingApp, setIsLoadingApp] = useState(true);
 
   useEffect(() => {
+    socket.on('disconnect', () => {
+      console.log('disconnect');
+    });
+
+    socket.on('connect', () => {
+      console.log('connected');
+    });
+
+    const connection = socket.connect();
+
     return () => {
       socket.disconnect();
     };
-  });
+  }, []);
 
   return (
     <View style={styles.container}>
       <StatusBar style="auto"/>
-      <NavigationContainer>
-        <Stack.Navigator>
-          <Stack.Screen
-            name={ROUTES.MAP}
-            component={Map}
-            options={{
-              headerShown: false,
-            }}
-          />
-          <Stack.Screen
-            name={ROUTES.INIT_USER}
-            component={InitUser}
-            options={{
-              headerShown: false,
-            }}
-          />
-          <Stack.Screen
-            name={ROUTES.ROOMS}
-            component={Rooms}
-            options={{ title: 'Список комнат' }}
-          />
-          <Stack.Screen
-            name={ROUTES.SETTINGS}
-            component={Settings}
-            options={{ title: 'Настройки' }}
-          />
-          <Stack.Screen
-            name={ROUTES.USERS}
-            component={Users}
-            options={{ title: 'Пользователи' }}
-          />
-          <Stack.Screen
-            name={ROUTES.USER}
-            component={User}
-          />
-          <Stack.Screen
-            name={ROUTES.ADD_ROOM}
-            component={AddRoom}
-            options={{ title: 'Создание комнаты' }}
-          />
-        </Stack.Navigator>
-      </NavigationContainer>
+      {
+        isLoadingApp ? <InitUser setIsLoading={setIsLoadingApp}/> :
+
+          <NavigationContainer>
+            <Stack.Navigator>
+              <Stack.Screen
+                name={ROUTES.MAP}
+                component={Map}
+                options={{
+                  headerShown: false,
+                }}
+              />
+              <Stack.Screen
+                name={ROUTES.ROOMS}
+                component={Rooms}
+                options={{ title: 'Список комнат' }}
+              />
+              <Stack.Screen
+                name={ROUTES.SETTINGS}
+                component={Settings}
+                options={{ title: 'Настройки' }}
+              />
+              <Stack.Screen
+                name={ROUTES.USERS}
+                component={Users}
+                options={{ title: 'Пользователи' }}
+              />
+              <Stack.Screen
+                name={ROUTES.USER}
+                component={User}
+              />
+              <Stack.Screen
+                name={ROUTES.ROOM_PAGE}
+                component={RoomPage}
+                options={{ title: 'Создание комнаты' }}
+              />
+            </Stack.Navigator>
+          </NavigationContainer>
+      }
     </View>
   );
 }

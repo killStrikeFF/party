@@ -49,6 +49,22 @@ export function Rooms({
     roomDataService.updateAllRooms();
   };
 
+  const openEditRoom = (roomInfo: RoomInfo): void => {
+    navigation.navigate(ROUTES.ROOM_PAGE, {
+      currentUserUuid,
+      isEditRoom: true,
+      roomInfo,
+    });
+  };
+
+  const openViewRoom = (roomInfo: RoomInfo): void => {
+    navigation.navigate(ROUTES.ROOM_PAGE, {
+      currentUserUuid,
+      isViewMode: true,
+      roomInfo,
+    });
+  };
+
   return (
     <View style={styles.container}>
       <View style={{ flex: 1 }}>

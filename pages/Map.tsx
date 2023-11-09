@@ -18,6 +18,7 @@ import {
   combineLatest,
   of,
   switchMap,
+  tap,
 } from 'rxjs';
 import { ChatDrawer } from '../components/ChatDrawer';
 import { InputMessage } from '../components/InputMessage';
@@ -65,6 +66,7 @@ export const Map = ({
   const [isCreatingRoomMode, setIsCreatingRoomMode] = useState(false);
   const [whisperUserName, setWhisperUserName] = useState('');
   const [isOpenChat, setIsOpenChat] = useState(false);
+  const [isConnectedToRoom, setIsConnectedToRoom] = useState(false);
 
   const openRoomList = (): void => {
     navigation.navigate(
@@ -95,7 +97,7 @@ export const Map = ({
   };
 
   const openAddRoom = (event: any): void => {
-    navigation.navigate(ROUTES.ADD_ROOM, {
+    navigation.navigate(ROUTES.ROOM_PAGE, {
       coords: event.nativeEvent.coordinate,
       currentUserUuid,
     });
@@ -105,10 +107,12 @@ export const Map = ({
     navigation.navigate(ROUTES.SETTINGS, {});
   };
 
+  const stopCreatingRoom = () => {
+    setIsCreatingRoomMode(false);
+  };
+
   useEffect(() => {
     BackHandler.addEventListener('hardwareBackPress', hardwareBackPress);
-
-    navigation.navigate(ROUTES.INIT_USER, {});
     userStorage.currentUserDetails$.subscribe(userDetails => {
       if (userDetails.uuid) {
         setCurrentUserUuid(userDetails.uuid);
@@ -139,6 +143,7 @@ export const Map = ({
     });
 
     roomDataService.connectedRoomId$.pipe(
+      tap(connectedRoomId => setIsConnectedToRoom(Boolean(connectedRoomId))),
       switchMap(connectedRoomId => {
         chatDataService.setIsShownChat(Boolean(connectedRoomId));
         chatDataService.setIsClosedChat(!Boolean(connectedRoomId));
@@ -179,6 +184,10 @@ export const Map = ({
 
   }, [route]);
 
+  const log = (some: any): void => {
+    console.log(some);
+  };
+
   return (
     <View style={styles.container}>
       {initialRegion ?
@@ -195,12 +204,13 @@ export const Map = ({
           ) => (
             !isCreatingRoomMode ?
               <Marker
-                key={user.name + index}
+                key={index}
                 coordinate={{
                   latitude: user.coords.latitude,
                   longitude: user.coords.longitude,
                 }}
                 onPress={openUserPage.bind(this, user)}
+                tracksInfoWindowChanges={false}
               >
                 <MapMarker user={user}></MapMarker>
               </Marker>
@@ -221,8 +231,10 @@ export const Map = ({
               ) => (
                 <Marker
                   coordinate={room.coords}
-                  key={room.name + index}
+                  key={index}
                   title={room.name}
+                  tracksViewChanges={false}
+                  tracksInfoWindowChanges={false}
                 >
 
                 </Marker>
@@ -301,33 +313,53 @@ export const Map = ({
             </Button>
           }
 
+          {!isConnectedToRoom ?
+            <Button
+              radius={'sm'}
+              type="outline"
+              buttonStyle={{
+                backgroundColor: 'white',
+                borderColor: 'black',
+                zIndex: 1,
+                marginBottom: 0,
+              }}
+              onPress={startCreatingRoom}
+              containerStyle={{
+                alignSelf: 'flex-end',
+                marginTop: 'auto',
+              }}
+            >
+              <Icon
+                name="add"
+                color="black"
+              />
+            </Button> : null}
+
+        </View>
+        : null}
+
+      {isCreatingRoomMode ?
+        <View style={styles.creatingRoomContainer}>
           <Button
             radius={'sm'}
             type="outline"
             buttonStyle={{
               backgroundColor: 'white',
               borderColor: 'black',
-              zIndex: 1,
-              marginBottom: 0,
             }}
-            onPress={startCreatingRoom}
             containerStyle={{
-              alignSelf: 'flex-end',
-              marginTop: 'auto',
+              borderWidth: 0,
             }}
+            onPress={stopCreatingRoom}
           >
             <Icon
-              name="add"
+              name="close"
               color="black"
             />
           </Button>
-        </View>
-        : null}
 
-      {isCreatingRoomMode ?
-        <View style={styles.creatingRoomContainer}>
           <View style={styles.creatingRoomInnerContainer}>
-            <Text>Выберите на карте координаты комнаты</Text>
+            <Text>Выберите координаты комнаты</Text>
           </View>
         </View>
         : null}
@@ -378,12 +410,17 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: '5%',
     opacity: 0.8,
-    justifyContent: 'center',
+    flex: 1,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    columnGap: 15,
   },
 
   creatingRoomInnerContainer: {
     backgroundColor: '#FFFFFF',
+    borderColor: 'black',
+    borderWidth: 0.2,
     borderRadius: 5,
     padding: 15,
   },
