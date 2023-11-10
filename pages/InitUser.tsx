@@ -3,19 +3,15 @@ import {
   useState,
 } from 'react';
 import {
+  ActivityIndicator,
   StyleSheet,
   View,
 } from 'react-native';
 import {
   Button,
   Input,
+  Text,
 } from '@rneui/themed';
-import { RouteProp } from '@react-navigation/native';
-import {
-  RootStackParamList,
-  ROUTES,
-} from '../types/routes';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
   roomDataService,
   socket,
@@ -23,16 +19,8 @@ import {
 } from '../utils/shared.utils';
 import { UserDetailsAuthorizedResponse } from '../types/userDetails';
 
-interface InitUserProps {
-  route: RouteProp<RootStackParamList, ROUTES.INIT_USER>;
-  navigation: NativeStackNavigationProp<RootStackParamList, ROUTES.INIT_USER>;
-}
-
-export function InitUser({
-                           navigation,
-                           route,
-                         }: InitUserProps) {
-
+export function InitUser({ setIsLoading }: { setIsLoading: React.Dispatch<React.SetStateAction<boolean>> }) {
+  const [innerLoading, setInnerLoading] = useState(true);
   const [clientName, changeClientName] = useState('');
 
   const saveClientName = (): void => {
@@ -43,53 +31,68 @@ export function InitUser({
     userStorage.getUserUuid().then(userUuid => {
       if (userUuid) {
         socket.emit('auth', { uuid: userUuid });
+      } else {
+        setInnerLoading(false);
       }
     });
   };
 
   useEffect(() => {
-    socket.on('connect', () => {
-      console.log('connected');
-    });
-
-    socket.connect();
     socket.on('isAuthorized', (userDetails: UserDetailsAuthorizedResponse) => {
       if (userDetails.auth) {
-
         if (userDetails.currentRoom) {
           roomDataService.joinRoom(userDetails.currentRoom.uuid, userDetails.uuid).then();
         }
-        navigation.navigate(ROUTES.MAP, {});
+
         userStorage.updateCurrentUserDetails(userDetails);
+        setIsLoading(false);
+      } else {
+        setInnerLoading(false);
       }
     });
 
     auth();
+
+    return () => {
+      console.log('destroy init');
+    };
   }, []);
 
   return (
-    <View style={styles.container}>
-      <Input
-        onChangeText={changeClientName}
-        value={clientName}
-        placeholder={'Введите ваше имя'}
-      />
+    innerLoading ?
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator
+          size="large"
+        />
+        <Text style={{ marginTop: 15 }}>Загружаем данные...</Text>
+      </View>
+      :
+      <View style={styles.container}>
+        <Input
+          onChangeText={changeClientName}
+          value={clientName}
+          placeholder={'Введите ваше имя'}
+        />
 
-      <Button
-        title="Зарегестрироваться"
-        onPress={() => saveClientName()}
-        disabled={!clientName}
-      />
-    </View>
+        <Button
+          title="Зарегистрироваться"
+          onPress={() => saveClientName()}
+          disabled={!clientName}
+        />
+      </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    display: 'flex',
-    flexDirection: 'column',
     columnGap: 20,
     padding: 50,
+  },
+
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
