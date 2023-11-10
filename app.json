@@ -1,6 +1,7 @@
 {
   "expo": {
     "name": "party",
+    "scheme": "party",
     "slug": "party",
     "version": "1.0.0",
     "orientation": "portrait",

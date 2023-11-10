@@ -33,6 +33,7 @@ export class RoomsDataService {
     distinctUntilChanged(),
     shareReplay(1),
   );
+  public readonly roomFromExternalLink$ = new BehaviorSubject<string>('');
 
   constructor(
     private readonly socket: Socket,
@@ -77,5 +78,9 @@ export class RoomsDataService {
   public async editRoom(roomBody: EditRoomBody): Promise<void> {
     await axios.put(`http://${BACKEND_API}/party`);
     this.updateAllRooms();
+  }
+
+  public setRoomFromExternalLink(uuid: string): void {
+    this.roomFromExternalLink$.next(uuid);
   }
 }

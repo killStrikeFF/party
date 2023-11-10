@@ -10,11 +10,35 @@ import {
   Text,
 } from '@rneui/themed';
 import React from 'react';
+import * as Linking from 'expo-linking';
+import * as Clipboard from 'expo-clipboard';
+import { BACKEND_API } from '../utils/backend';
 
 export function RoomListItem({
                                room,
                                connectToRoom,
                              }: { room: RoomInfo, connectToRoom: (roomId: string) => void }) {
+  const copyLink = (uuid: string) => {
+    const appUrl = Linking.createURL('');
+    const localAppLink = appUrl.substring(
+      appUrl.indexOf('//') + 2,
+      appUrl.lastIndexOf(':'),
+    );
+    const localPort = appUrl.substring(appUrl.lastIndexOf(':') + 1);
+    const url = Linking.createURL(
+      'party/join-private-room',
+      {
+        queryParams: {
+          roomId: uuid,
+          localAppLink,
+          localPort,
+        },
+      },
+    );
+    const replacedWithBackend = url.replace(url.substring(0, url.indexOf('/--/') + 3), `http://${BACKEND_API}`);
+    Clipboard.setStringAsync(replacedWithBackend).then();
+  };
+
   return (
     <ListItem
       bottomDivider
@@ -67,6 +91,8 @@ export function RoomListItem({
               style={{ marginLeft: 5 }}
             />
           </Button>
+
+          <Button onPress={() => copyLink(room.uuid)}>LINK</Button>
         </View>
       </ListItem.Content>
     </ListItem>

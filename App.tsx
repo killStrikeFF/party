@@ -17,11 +17,15 @@ import {
   useEffect,
   useState,
 } from 'react';
-import { socket } from './utils/shared.utils';
 import { Settings } from './pages/Settings';
 import { Users } from './pages/Users';
 import { User } from './pages/User';
 import { RoomPage } from './pages/RoomPage';
+import {
+  roomDataService,
+  socket,
+} from './utils/shared.utils';
+import * as Linking from 'expo-linking';
 
 export default function App() {
   const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -37,11 +41,21 @@ export default function App() {
     });
 
     const connection = socket.connect();
+    subscribeForExternalLinks();
 
     return () => {
       socket.disconnect();
     };
   }, []);
+
+  const subscribeForExternalLinks = () => {
+    Linking.addEventListener('url', event => {
+      const roomId = event.url.split('room=').pop();
+      if (roomId) {
+        roomDataService.setRoomFromExternalLink(roomId);
+      }
+    });
+  };
 
   return (
     <View style={styles.container}>
