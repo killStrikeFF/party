@@ -50,7 +50,6 @@ export function Users({
   const leaveRoom = () => {
     roomDataService.leaveRoom().then(() => {
       navigation.navigate(ROUTES.MAP, {});
-      setTimeout(() => roomDataService.updateAllRooms(), 3000);
     });
   };
 

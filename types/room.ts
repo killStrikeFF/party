@@ -2,7 +2,7 @@ import { Coordinates } from './coordinates';
 
 export interface Room {
   name: string;
-  coords: Coordinates;
+  initialCoordinates: Coordinates;
 }
 
 export interface EditRoomBody {
@@ -28,7 +28,8 @@ export interface OwnerRoom {
 }
 
 export interface CreateRoom extends Room {
-  uuid: string;
+  userUuid: string;
+  isPrivate?: boolean;
 }
 
 export type UserCoordinatesForRoomDto = Coordinates;

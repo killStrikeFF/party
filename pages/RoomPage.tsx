@@ -54,8 +54,8 @@ export function RoomPage({
   const createRoom = (): void => {
     const room: CreateRoom = {
       name: roomName,
-      uuid: currentUserUuid,
-      coords: coords as Coordinates,
+      userUuid: currentUserUuid,
+      initialCoordinates: coords as Coordinates,
     };
 
     roomDataService.createRoom(room).then(() => cancelCreateRoom());

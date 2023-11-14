@@ -1,7 +1,4 @@
-import {
-  useEffect,
-  useState,
-} from 'react';
+import { useState } from 'react';
 import {
   ActivityIndicator,
   StyleSheet,
@@ -12,54 +9,15 @@ import {
   Input,
   Text,
 } from '@rneui/themed';
-import {
-  roomDataService,
-  socket,
-  userStorage,
-} from '../utils/shared.utils';
-import { UserDetailsAuthorizedResponse } from '../types/userDetails';
 
-export function InitUser({ setIsLoading }: { setIsLoading: React.Dispatch<React.SetStateAction<boolean>> }) {
-  const [innerLoading, setInnerLoading] = useState(true);
+export function InitUser({
+                           isLoading,
+                           registry,
+                         }: { isLoading: boolean, registry: (clientName: string) => void }) {
   const [clientName, changeClientName] = useState('');
 
-  const saveClientName = (): void => {
-    userStorage.registry(clientName).then(() => auth());
-  };
-
-  const auth = (): void => {
-    userStorage.getUserUuid().then(userUuid => {
-      if (userUuid) {
-        socket.emit('auth', { uuid: userUuid });
-      } else {
-        setInnerLoading(false);
-      }
-    });
-  };
-
-  useEffect(() => {
-    socket.on('isAuthorized', (userDetails: UserDetailsAuthorizedResponse) => {
-      if (userDetails.auth) {
-        if (userDetails.currentRoom) {
-          roomDataService.joinRoom(userDetails.currentRoom.uuid, userDetails.uuid).then();
-        }
-
-        userStorage.updateCurrentUserDetails(userDetails);
-        setIsLoading(false);
-      } else {
-        setInnerLoading(false);
-      }
-    });
-
-    auth();
-
-    return () => {
-      console.log('destroy init');
-    };
-  }, []);
-
   return (
-    innerLoading ?
+    isLoading ?
       <View style={styles.loadingContainer}>
         <ActivityIndicator
           size="large"
@@ -76,7 +34,7 @@ export function InitUser({ setIsLoading }: { setIsLoading: React.Dispatch<React.
 
         <Button
           title="Зарегистрироваться"
-          onPress={() => saveClientName()}
+          onPress={() => registry(clientName)}
           disabled={!clientName}
         />
       </View>
