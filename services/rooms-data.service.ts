@@ -2,6 +2,7 @@ import {
   BehaviorSubject,
   combineLatest,
   distinctUntilChanged,
+  filter,
   map,
   shareReplay,
 } from 'rxjs';
@@ -42,6 +43,13 @@ export class RoomsDataService {
     this.socket.on('allParties', response => {
       this.rooms$.next(response.parties);
     });
+
+    combineLatest([
+      this.userStorage.currentUserDetails$,
+      this.roomFromExternalLink$.pipe(filter(Boolean), distinctUntilChanged()),
+    ]).subscribe(([userDetails, roomId]) => {
+      this.joinRoom(roomId, userDetails.uuid);
+    });
   }
 
   public updateAllRooms(): void {
@@ -50,7 +58,6 @@ export class RoomsDataService {
 
   public async createRoom(roomDto: CreateRoom): Promise<void> {
     await axios.post(`http://${BACKEND_API}/party`, roomDto);
-    this.updateAllRooms();
   };
 
   public async joinRoom(
@@ -64,20 +71,18 @@ export class RoomsDataService {
         userUuid,
       },
     );
-    this.updateAllRooms();
     this.connectedRoomId$.next(res.data.uuid || '');
   };
 
   public async leaveRoom(): Promise<void> {
     const userId = await this.userStorage.getUserUuid();
     await axios.post(`http://${BACKEND_API}/party/leave`, { uuid: userId });
-    this.updateAllRooms();
     this.connectedRoomId$.next('');
+    this.roomFromExternalLink$.next('');
   };
 
   public async editRoom(roomBody: EditRoomBody): Promise<void> {
     await axios.put(`http://${BACKEND_API}/party`);
-    this.updateAllRooms();
   }
 
   public setRoomFromExternalLink(uuid: string): void {

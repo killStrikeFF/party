@@ -156,7 +156,6 @@ export const Map = ({
     ).subscribe(res => setUsersMap(res));
 
     userLocationTracking.initialRegion$.subscribe(region => setInitialRegion(region));
-
     return () => {
       BackHandler.removeEventListener('hardwareBackPress', hardwareBackPress);
     };
@@ -183,10 +182,6 @@ export const Map = ({
     }
 
   }, [route]);
-
-  const log = (some: any): void => {
-    console.log(some);
-  };
 
   return (
     <View style={styles.container}>
@@ -221,7 +216,7 @@ export const Map = ({
           {!isCreatingRoomMode ?
             currentRoomInfo ?
               <Marker
-                coordinate={currentRoomInfo.coords}
+                coordinate={currentRoomInfo.initialCoordinates}
                 title={currentRoomInfo.name}
               ></Marker>
 
@@ -230,7 +225,7 @@ export const Map = ({
                 index,
               ) => (
                 <Marker
-                  coordinate={room.coords}
+                  coordinate={room.initialCoordinates}
                   key={index}
                   title={room.name}
                   tracksViewChanges={false}
