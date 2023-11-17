@@ -13,6 +13,7 @@ import React from 'react';
 import * as Linking from 'expo-linking';
 import * as Clipboard from 'expo-clipboard';
 import { BACKEND_API } from '../utils/backend';
+import { LoggingService } from '../utils/logging';
 
 export function RoomListItem({
                                room,
@@ -35,7 +36,11 @@ export function RoomListItem({
         },
       },
     );
+    LoggingService.log('baseAppUrl: ' + appUrl);
+    LoggingService.log('resultLocalUrl: ' + url);
+
     const replacedWithBackend = url.replace(url.substring(0, url.indexOf('/--/') + 3), `http://${BACKEND_API}`);
+    LoggingService.log('replacedHostUrl: ' + replacedWithBackend);
     Clipboard.setStringAsync(replacedWithBackend).then();
   };
 
