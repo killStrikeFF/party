@@ -259,11 +259,11 @@ export const Map = ({
 
       {!isCreatingRoomMode ? <View style={styles.actionsContainer}>
           <Button
-            radius={'sm'}
+            radius={'md'}
             type="outline"
             buttonStyle={{
               backgroundColor: 'white',
-              borderColor: 'black',
+              borderColor: '#aeaeae',
               zIndex: 1,
             }}
             onPress={openSettings}
@@ -276,11 +276,11 @@ export const Map = ({
 
           {isShowChat ?
             <Button
-              radius={'sm'}
+              radius={'md'}
               type="outline"
               buttonStyle={{
                 backgroundColor: 'white',
-                borderColor: 'black',
+                borderColor: '#aeaeae',
                 zIndex: 1,
               }}
               onPress={openUsersPage}
@@ -292,11 +292,11 @@ export const Map = ({
             </Button>
             :
             <Button
-              radius={'sm'}
+              radius={'md'}
               type="outline"
               buttonStyle={{
                 backgroundColor: 'white',
-                borderColor: 'black',
+                borderColor: '#aeaeae',
                 zIndex: 1,
               }}
               onPress={openRoomList}
@@ -310,11 +310,11 @@ export const Map = ({
 
           {!isConnectedToRoom ?
             <Button
-              radius={'sm'}
+              radius={'md'}
               type="outline"
               buttonStyle={{
                 backgroundColor: 'white',
-                borderColor: 'black',
+                borderColor: '#aeaeae',
                 zIndex: 1,
                 marginBottom: 0,
               }}
@@ -336,11 +336,11 @@ export const Map = ({
       {isCreatingRoomMode ?
         <View style={styles.creatingRoomContainer}>
           <Button
-            radius={'sm'}
+            radius={'md'}
             type="outline"
             buttonStyle={{
               backgroundColor: 'white',
-              borderColor: 'black',
+              borderColor: '#aeaeae',
             }}
             containerStyle={{
               borderWidth: 0,
