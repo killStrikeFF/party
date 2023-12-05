@@ -3,6 +3,7 @@
     "name": "party",
     "scheme": "party",
     "slug": "party",
+    "owner": "partyhard",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -17,7 +18,7 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.killstrikeff.party",
+      "bundleIdentifier": "com.partyhard.party",
       "buildNumber": "1.0.0",
       "infoPlist": {
         "UIBackgroundModes": [
@@ -27,7 +28,7 @@
       }
     },
     "android": {
-      "package": "com.killstrikeff.party",
+      "package": "com.partyhard.party",
       "permissions": [
         "ACCESS_BACKGROUND_LOCATION"
       ],
@@ -44,7 +45,7 @@
     },
     "extra": {
       "eas": {
-        "projectId": "7e2d2736-0a3f-4786-9785-df386478e51b"
+        "projectId": "4a0a038a-d9a0-44b7-ad0c-efabd0c10217"
       }
     },
     "web": {
