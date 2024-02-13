@@ -2,13 +2,8 @@ import { RoomsDataService } from '../services/rooms-data.service';
 import { UserStorage } from './userStorage.utils';
 import { ChatDataService } from '../services/chat-data.service';
 import { UserLocationTracking } from './userLocationTracking';
-import { io } from 'socket.io-client';
-import { BACKEND_API } from './backend';
 import { UsersDataService } from '../services/users-data.service';
-
-export const socket = io(`ws://${BACKEND_API}`, {
-  autoConnect: false,
-});
+import { socket } from './socketConnection';
 
 export const userStorage = new UserStorage();
 export const roomDataService = new RoomsDataService(socket, userStorage);

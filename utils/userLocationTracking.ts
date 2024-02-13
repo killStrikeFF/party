@@ -62,7 +62,7 @@ export class UserLocationTracking {
       return;
     }
 
-    const isTaskDefined = await TaskManager.isTaskDefined(this.backgroundTaskName);
+    const isTaskDefined = TaskManager.isTaskDefined(this.backgroundTaskName);
     if (!isTaskDefined) {
       return;
     }
@@ -104,7 +104,7 @@ export class UserLocationTracking {
           const location = locations[0];
 
           if (location && this.socket.id) {
-            this.roomDataService.connectedRoomId$.pipe(take(1), filter(Boolean)).subscribe(roomUuid => {
+            this.roomDataService.connectedRoomId$.pipe(take(1), filter(Boolean)).subscribe(() => {
               const userCoordinatesForRoom: UserCoordinatesForRoomDto = {
                 latitude: location.coords.latitude,
                 longitude: location.coords.longitude,
