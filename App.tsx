@@ -32,6 +32,7 @@ import { BACKEND_API } from './utils/backend';
 import { ThemeProvider } from '@rneui/themed';
 import { StatusBar } from 'expo-status-bar';
 import { socket } from './utils/socketConnection';
+import { themeProviderParty } from './styles/theme.provider';
 
 setJSExceptionHandler((
   error,
@@ -97,7 +98,7 @@ export default function App() {
   }, []);
 
   return (
-    <ThemeProvider>
+    <ThemeProvider theme={themeProviderParty}>
       <View style={styles.container}>
         <StatusBar style="auto"/>
         {
